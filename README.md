@@ -5,5 +5,5 @@
 2. Includes Maven wrapper (`mvnw`)
 
 ### Run
-1. `./mvnw clean test`
-2. Profiles coming soon
+1. `./mvnw [-D"spring.profiles.active"=private|testnet] clean test`
+2. If profile is not given, defaults to `private`.
