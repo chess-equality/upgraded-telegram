@@ -9,6 +9,6 @@
 `$ solc erc20_coin.sol --bin --abi --optimize -o build/`
 
 ### Generate Java wrapper class file
-1. `$ web3j solidity generate build/Token.bin build/Token.abi -o build -p net.kreatious.ethereum.upgradedtelegram.contract.generated`
+1. `$ web3j solidity generate build/Token.bin build/Token.abi -o generated -p net.kreatious.ethereum.upgradedtelegram.contract.generated`
 2. Copy generated class file to appropriate package in `src/main/java`.
 3. Delete the generated class file here in `generated` folder.
