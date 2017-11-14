@@ -33,7 +33,7 @@ public class NegativeTests_Erc20 extends UpgradedtelegramApplicationTests {
     @Test
     public void testTransferByNonOwner() throws Exception {
     
-        log.info("#################### START: testTransferByNonOwner()");
+        log.info("******************** START: testTransferByNonOwner()");
         
         BigInteger ownerBalanceBefore = getOwnerContract().balanceOf(getOwner().getAddress()).send();
         log.info(">>>>>>>>>> Owner Supply before = " + ownerBalanceBefore.toString());
@@ -71,6 +71,6 @@ public class NegativeTests_Erc20 extends UpgradedtelegramApplicationTests {
     
         assertThat(ownerBalanceBefore, equalTo(ownerBalanceAfter));
     
-        log.info("#################### END: testTransferByNonOwner()");
+        log.info("******************** END: testTransferByNonOwner()");
     }
 }

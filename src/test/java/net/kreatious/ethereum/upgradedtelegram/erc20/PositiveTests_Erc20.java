@@ -31,7 +31,7 @@ public class PositiveTests_Erc20 extends UpgradedtelegramApplicationTests {
     @Test
     public void testTransferByOwner() throws Exception {
     
-        log.info("#################### START: testTransferByOwner()");
+        log.info("******************** START: testTransferByOwner()");
         
         BigInteger ownerBalanceBefore = getOwnerContract().balanceOf(getOwner().getAddress()).send();
         log.info(">>>>>>>>>> Owner Supply before = " + ownerBalanceBefore.toString());
@@ -57,6 +57,6 @@ public class PositiveTests_Erc20 extends UpgradedtelegramApplicationTests {
         
         assertThat(ownerBalanceBefore, equalTo(ownerBalanceAfter.add(bobTransferEventValues._value)));
     
-        log.info("#################### END: testTransferByOwner()");
+        log.info("******************** END: testTransferByOwner()");
     }
 }
