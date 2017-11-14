@@ -45,7 +45,7 @@ contract Token {
     }
     
     // Gets the total supply of tokens
-    function totalSupply() public constant returns (uint256 total) {
+    function totalSupply() public constant returns (uint256 totalTokenSupply) {
         return supply - balances[0];
     }
     
