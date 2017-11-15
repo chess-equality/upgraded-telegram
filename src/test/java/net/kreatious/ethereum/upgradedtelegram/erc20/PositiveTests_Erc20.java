@@ -44,20 +44,20 @@ public class PositiveTests_Erc20 extends UpgradedtelegramApplicationTests {
         log.info(">>>>>>>>>> transferToBob in Ether equivalent = " + new BigDecimal(transferToBob).toPlainString());
         log.info(">>>>>>>>>> transferToBob in Wei equivalent = " + transferToBobInWei.toString());
         
-        TransactionReceipt bobTransferReceipt = getOwnerContract().transfer(getBobAddress(), transferToBobInWei).send();
+        TransactionReceipt transactionReceipt = getOwnerContract().transfer(getBobAddress(), transferToBobInWei).send();
         
-        Token.TransferEventResponse bobTransferEventValues = getOwnerContract().getTransferEvents(bobTransferReceipt).get(0);
+        Token.TransferEventResponse transferEventValues = getOwnerContract().getTransferEvents(transactionReceipt).get(0);
         
-        assertThat(bobTransferEventValues._from, equalTo(getOwnerAddress()));
-        assertThat(bobTransferEventValues._to, equalTo(getBobAddress()));
-        assertThat(bobTransferEventValues._value, equalTo(transferToBobInWei));
+        assertThat(transferEventValues._from, equalTo(getOwnerAddress()));
+        assertThat(transferEventValues._to, equalTo(getBobAddress()));
+        assertThat(transferEventValues._value, equalTo(transferToBobInWei));
         
-        log.info(">>>>>>>>>> value from transfer event = " + bobTransferEventValues._value);
+        log.info(">>>>>>>>>> value from transfer event = " + transferEventValues._value);
         
         BigInteger ownerBalanceAfter = getOwnerContract().balanceOf(getOwnerAddress()).send();
         log.info(">>>>>>>>>> Owner supply after = " + ownerBalanceAfter.toString());
         
-        assertThat(ownerBalanceBefore, equalTo(ownerBalanceAfter.add(bobTransferEventValues._value)));
+        assertThat(ownerBalanceBefore, equalTo(ownerBalanceAfter.add(transferEventValues._value)));
         
         log.info("******************** END: testTransferByOwner()");
     }
@@ -128,5 +128,52 @@ public class PositiveTests_Erc20 extends UpgradedtelegramApplicationTests {
         log.info(">>>>>>>>>> Alice balance after = " + aliceBalance.toString());
         
         log.info("******************** END: testApproveAllowanceAndTransfer()");
+    }
+    
+    /**
+     * Tests purchase of tokens by Alice
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testPurchase() throws Exception {
+    
+        log.info("******************** START: testPurchase()");
+        
+        BigInteger ownerBalance = getOwnerContract().balanceOf(getOwnerAddress()).send();
+        log.info(">>>>>>>>>> Owner supply before = " + ownerBalance.toString());
+    
+        BigInteger aliceBalance = getOwnerContract().balanceOf(getAliceAddress()).send();
+        log.info(">>>>>>>>>> Alice balance before = " + aliceBalance.toString());
+        
+        Credentials alice = Credentials.create(getAlicePrivateKey());
+    
+        // Alice requires her own contract instance
+        Token aliceContract = load(getOwnerContract().getContractAddress(), getAdmin(), alice, GAS_PRICE, GAS_LIMIT);
+    
+        BigInteger tokensPerWei = BigInteger.valueOf(2_000);
+        BigInteger weiToPurchase = BigInteger.valueOf(1_000_000_000_000_000_000L);  // puchase 1 ETH worth of tokens
+        
+        BigInteger totalTokensToPurchase = weiToPurchase.multiply(tokensPerWei);
+        log.info(">>>>>>>>>> totalTokensToPurchase = " + totalTokensToPurchase.toString());
+        
+        TransactionReceipt transactionReceipt = aliceContract.purchase(weiToPurchase).send();
+    
+        Token.TransferEventResponse transferEventResponse = getOwnerContract().getTransferEvents(transactionReceipt).get(0);
+        
+        assertThat(transferEventResponse._from, equalTo(getOwnerAddress()));
+        assertThat(transferEventResponse._to, equalTo(getAliceAddress()));
+        assertThat(transferEventResponse._value, equalTo(totalTokensToPurchase));
+    
+        ownerBalance = ownerBalance.subtract(totalTokensToPurchase);
+        aliceBalance = aliceBalance.add(totalTokensToPurchase);
+    
+        assertThat(getOwnerContract().balanceOf(getOwnerAddress()).send(), equalTo(ownerBalance));
+        assertThat(getOwnerContract().balanceOf(getAliceAddress()).send(), equalTo(aliceBalance));
+    
+        log.info(">>>>>>>>>> Owner supply after = " + ownerBalance.toString());
+        log.info(">>>>>>>>>> Alice balance after = " + aliceBalance.toString());
+        
+        log.info("******************** END: testPurchase()");
     }
 }
