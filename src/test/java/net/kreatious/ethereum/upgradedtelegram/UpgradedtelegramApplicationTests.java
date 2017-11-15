@@ -50,13 +50,13 @@ public class UpgradedtelegramApplicationTests {
 	public void setUp() throws Exception {
 		
 		// Test for blockchain connectivity
-		assert(getAdmin().netListening().sendAsync().get().isListening());
+		assert(admin.netListening().sendAsync().get().isListening());
 		log.info("########## Blockchain is synced");
 		
-		owner = Credentials.create(getOwnerPrivateKey());
+		owner = Credentials.create(ownerPrivateKey);
 		
 		// Load contract
-		ownerContract = load(getContractAddress(), getAdmin(), owner, GAS_PRICE, GAS_LIMIT);
+		ownerContract = load(contractAddress, admin, owner, GAS_PRICE, GAS_LIMIT);
 		
 		// Test if contract is valid
 		assertTrue(ownerContract.isValid());

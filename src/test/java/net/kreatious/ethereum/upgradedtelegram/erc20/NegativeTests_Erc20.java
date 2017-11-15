@@ -36,7 +36,7 @@ public class NegativeTests_Erc20 extends UpgradedtelegramApplicationTests {
         log.info("******************** START: testTransferByNonOwner()");
         
         BigInteger ownerBalanceBefore = getOwnerContract().balanceOf(getOwner().getAddress()).send();
-        log.info(">>>>>>>>>> Owner Supply before = " + ownerBalanceBefore.toString());
+        log.info(">>>>>>>>>> Owner supply before = " + ownerBalanceBefore.toString());
         
         Credentials bob = Credentials.create(getBobPrivateKey());
         
@@ -67,7 +67,7 @@ public class NegativeTests_Erc20 extends UpgradedtelegramApplicationTests {
         assertThat(bobBalanceBefore, equalTo(bobBalanceAfter));
     
         BigInteger ownerBalanceAfter = getOwnerContract().balanceOf(getOwner().getAddress()).send();
-        log.info(">>>>>>>>>> Owner Supply after = " + ownerBalanceAfter.toString());
+        log.info(">>>>>>>>>> Owner supply after = " + ownerBalanceAfter.toString());
     
         assertThat(ownerBalanceBefore, equalTo(ownerBalanceAfter));
     
