@@ -54,6 +54,10 @@ public class SellTest extends UpgradedtelegramApplicationTests {
         BigInteger totalTokensToSell = weiToSell.multiply(tokensPerWei);
         log.info(">>>>>>>>>> totalTokensToSell = " + totalTokensToSell.toString());
         
+        // Test first if Alice has capacity to sell the number of tokens
+        assertThat("Tokens to sell is greater than Alice's balance", true, equalTo(aliceBalance.compareTo(totalTokensToSell) >= 0));
+        
+        // Do sell
         TransactionReceipt transactionReceipt = aliceContract.sell(totalTokensToSell).send();
         
         Token.TransferEventResponse transferEventValues = getOwnerContract().getTransferEvents(transactionReceipt).get(0);
