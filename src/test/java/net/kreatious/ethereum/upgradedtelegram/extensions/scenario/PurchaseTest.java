@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.web3j.crypto.Credentials;
@@ -19,9 +20,12 @@ import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class PuchaseTest extends UpgradedtelegramApplicationTests {
+public class PurchaseTest extends UpgradedtelegramApplicationTests {
     
-    private final Logger log = LoggerFactory.getLogger(PuchaseTest.class);
+    private final Logger log = LoggerFactory.getLogger(PurchaseTest.class);
+    
+    @Value("${tokensPerWei}")
+    private String tokensPerWeiProp;
     
     /**
      * Tests purchase of tokens by Alice
@@ -44,7 +48,7 @@ public class PuchaseTest extends UpgradedtelegramApplicationTests {
         // Alice requires her own contract instance
         Token aliceContract = load(getOwnerContract().getContractAddress(), getAdmin(), alice, GAS_PRICE, GAS_LIMIT);
         
-        BigInteger tokensPerWei = BigInteger.valueOf(2_000);
+        BigInteger tokensPerWei = BigInteger.valueOf(Long.parseLong(tokensPerWeiProp));
         BigInteger weiToPurchase = BigInteger.valueOf(1_000_000_000_000_000_000L);  // purchase 1 ETH worth of tokens
         
         BigInteger totalTokensToPurchase = weiToPurchase.multiply(tokensPerWei);

@@ -1,6 +1,6 @@
 package net.kreatious.ethereum.upgradedtelegram.extensions;
 
-import net.kreatious.ethereum.upgradedtelegram.extensions.scenario.PuchaseTest;
+import net.kreatious.ethereum.upgradedtelegram.extensions.scenario.PurchaseTest;
 import net.kreatious.ethereum.upgradedtelegram.extensions.scenario.SellTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
@@ -10,7 +10,7 @@ import org.junit.runners.Suite;
  */
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
-    PuchaseTest.class,
+    PurchaseTest.class,
     SellTest.class
 })
 public class TestSuite_Extensions {
