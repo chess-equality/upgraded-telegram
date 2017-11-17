@@ -40,7 +40,6 @@ public class UpgradedtelegramApplicationTests {
 	private Admin admin;
 	
 	private Credentials owner;
-	
 	private Token ownerContract;
 	
 	public static final BigInteger GAS_PRICE = BigInteger.valueOf(22_000_000_000L);
