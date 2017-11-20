@@ -49,7 +49,7 @@ public class SellTest extends UpgradedtelegramApplicationTests {
         Token aliceContract = load(getOwnerContract().getContractAddress(), getAdmin(), alice, GAS_PRICE, GAS_LIMIT);
         
         BigInteger tokensPerWei = BigInteger.valueOf(Long.parseLong(tokensPerWeiProp));
-        BigInteger weiToSell = BigInteger.valueOf(1_000_000_000_000_000_000L);  // sell 1 ETH worth of tokens
+        BigInteger weiToSell = BigInteger.valueOf(1_000_000);  // In testnet, watch out for gas when sending large transactions
         
         BigInteger totalTokensToSell = weiToSell.multiply(tokensPerWei);
         log.info(">>>>>>>>>> totalTokensToSell = " + totalTokensToSell.toString());
@@ -69,15 +69,19 @@ public class SellTest extends UpgradedtelegramApplicationTests {
         assertThat(transferEventValues._to, equalTo(getOwnerAddress()));
         assertThat(transferEventValues._value, equalTo(totalTokensToSell));
     
-        // Test that the owner's balance has been increased by the tokens sold by Alice
-        ownerBalance = ownerBalance.add(totalTokensToSell);
-        log.info(">>>>>>>>>> Owner's supply after = " + getOwnerContract().balanceOf(getOwnerAddress()).send().toString());
-        assertThat(getOwnerContract().balanceOf(getOwnerAddress()).send(), equalTo(ownerBalance));
+        // Only check for the balance updates in private blockchain (i.e., testrpc) since in testnet, we don't know when the transaction will be mined
+        if (getActiveProfile().equals("private")) {
+            
+            // Test that the owner's balance has been increased by the tokens sold by Alice
+            ownerBalance = ownerBalance.add(totalTokensToSell);
+            log.info(">>>>>>>>>> Owner's supply after = " + getOwnerContract().balanceOf(getOwnerAddress()).send().toString());
+            assertThat(getOwnerContract().balanceOf(getOwnerAddress()).send(), equalTo(ownerBalance));
     
-        // Test that Alice's balance has been subtracted by the sold tokens
-        aliceBalance = aliceBalance.subtract(totalTokensToSell);
-        log.info(">>>>>>>>>> Alice's balance after = " + getOwnerContract().balanceOf(getAliceAddress()).send().toString());
-        assertThat(getOwnerContract().balanceOf(getAliceAddress()).send(), equalTo(aliceBalance));
+            // Test that Alice's balance has been subtracted by the sold tokens
+            aliceBalance = aliceBalance.subtract(totalTokensToSell);
+            log.info(">>>>>>>>>> Alice's balance after = " + getOwnerContract().balanceOf(getAliceAddress()).send().toString());
+            assertThat(getOwnerContract().balanceOf(getAliceAddress()).send(), equalTo(aliceBalance));
+        }
         
         log.info("******************** END: testSell()");
     }

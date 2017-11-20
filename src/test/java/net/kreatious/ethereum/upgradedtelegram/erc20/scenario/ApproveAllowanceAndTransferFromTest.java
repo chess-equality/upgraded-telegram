@@ -82,8 +82,11 @@ public class ApproveAllowanceAndTransferFromTest extends UpgradedtelegramApplica
     
         log.info(">>>>>>>>>> Alice's allowance = " + getOwnerContract().allowance(getOwnerAddress(), getAliceAddress()).send().toString());
     
-        // Test allowance limit for Alice
-        assertThat(getOwnerContract().allowance(getOwnerAddress(), getAliceAddress()).send(), equalTo(allowance));
+        // Only check for the balance updates in private blockchain (i.e., testrpc) since in testnet, we don't know when the transaction will be mined
+        if (getActiveProfile().equals("private")) {
+            // Test allowance limit for Alice
+            assertThat(getOwnerContract().allowance(getOwnerAddress(), getAliceAddress()).send(), equalTo(allowance));
+        }
     
         log.info("******************** END: Test approve allowance");
         
@@ -117,15 +120,18 @@ public class ApproveAllowanceAndTransferFromTest extends UpgradedtelegramApplica
         assertThat(aliceTransferEventValues._to, equalTo(getAliceAddress()));
         assertThat(aliceTransferEventValues._value, equalTo(tokensToTransfer));
         
-        // Test that the owner's balance has been subtracted by the tokens transferred to Alice
-        ownerBalance = ownerBalance.subtract(tokensToTransfer);
-        log.info(">>>>>>>>>> Owner's supply after = " + getOwnerContract().balanceOf(getOwnerAddress()).send().toString());
-        assertThat(getOwnerContract().balanceOf(getOwnerAddress()).send(), equalTo(ownerBalance));
+        if (getActiveProfile().equals("private")) {
+            
+            // Test that the owner's balance has been subtracted by the tokens transferred to Alice
+            ownerBalance = ownerBalance.subtract(tokensToTransfer);
+            log.info(">>>>>>>>>> Owner's supply after = " + getOwnerContract().balanceOf(getOwnerAddress()).send().toString());
+            assertThat(getOwnerContract().balanceOf(getOwnerAddress()).send(), equalTo(ownerBalance));
     
-        // Test that Alice's balance has been increased by the transferred tokens
-        aliceBalance = aliceBalance.add(tokensToTransfer);
-        log.info(">>>>>>>>>> Alice's balance after = " + getOwnerContract().balanceOf(getAliceAddress()).send().toString());
-        assertThat(getOwnerContract().balanceOf(getAliceAddress()).send(), equalTo(aliceBalance));
+            // Test that Alice's balance has been increased by the transferred tokens
+            aliceBalance = aliceBalance.add(tokensToTransfer);
+            log.info(">>>>>>>>>> Alice's balance after = " + getOwnerContract().balanceOf(getAliceAddress()).send().toString());
+            assertThat(getOwnerContract().balanceOf(getAliceAddress()).send(), equalTo(aliceBalance));
+        }
         
         log.info("******************** END: Test transfer from");
     }

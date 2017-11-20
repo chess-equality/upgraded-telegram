@@ -49,7 +49,7 @@ public class PurchaseTest extends UpgradedtelegramApplicationTests {
         Token aliceContract = load(getOwnerContract().getContractAddress(), getAdmin(), alice, GAS_PRICE, GAS_LIMIT);
         
         BigInteger tokensPerWei = BigInteger.valueOf(Long.parseLong(tokensPerWeiProp));
-        BigInteger weiToPurchase = BigInteger.valueOf(1_000_000_000_000_000_000L);  // purchase 1 ETH worth of tokens
+        BigInteger weiToPurchase = BigInteger.valueOf(1_000_000);  // In testnet, watch out for gas when sending large transactions
         
         BigInteger totalTokensToPurchase = weiToPurchase.multiply(tokensPerWei);
         log.info(">>>>>>>>>> totalTokensToPurchase = " + totalTokensToPurchase.toString());
@@ -66,15 +66,19 @@ public class PurchaseTest extends UpgradedtelegramApplicationTests {
         assertThat(transferEventValues._to, equalTo(getAliceAddress()));
         assertThat(transferEventValues._value, equalTo(totalTokensToPurchase));
     
-        // Test that the owner's balance has been subtracted by the tokens purchased by Alice
-        ownerBalance = ownerBalance.subtract(totalTokensToPurchase);
-        log.info(">>>>>>>>>> Owner's supply after = " + getOwnerContract().balanceOf(getOwnerAddress()).send().toString());
-        assertThat(getOwnerContract().balanceOf(getOwnerAddress()).send(), equalTo(ownerBalance));
+        // Only check for the balance updates in private blockchain (i.e., testrpc) since in testnet, we don't know when the transaction will be mined
+        if (getActiveProfile().equals("private")) {
+            
+            // Test that the owner's balance has been subtracted by the tokens purchased by Alice
+            ownerBalance = ownerBalance.subtract(totalTokensToPurchase);
+            log.info(">>>>>>>>>> Owner's supply after = " + getOwnerContract().balanceOf(getOwnerAddress()).send().toString());
+            assertThat(getOwnerContract().balanceOf(getOwnerAddress()).send(), equalTo(ownerBalance));
     
-        // Test that Alice's balance has been increased by the purchased tokens
-        aliceBalance = aliceBalance.add(totalTokensToPurchase);
-        log.info(">>>>>>>>>> Alice's balance after = " + getOwnerContract().balanceOf(getAliceAddress()).send().toString());
-        assertThat(getOwnerContract().balanceOf(getAliceAddress()).send(), equalTo(aliceBalance));
+            // Test that Alice's balance has been increased by the purchased tokens
+            aliceBalance = aliceBalance.add(totalTokensToPurchase);
+            log.info(">>>>>>>>>> Alice's balance after = " + getOwnerContract().balanceOf(getAliceAddress()).send().toString());
+            assertThat(getOwnerContract().balanceOf(getAliceAddress()).send(), equalTo(aliceBalance));
+        }
         
         log.info("******************** END: testPurchase()");
     }

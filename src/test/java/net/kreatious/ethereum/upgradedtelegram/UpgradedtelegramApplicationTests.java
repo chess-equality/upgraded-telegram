@@ -18,6 +18,9 @@ public class UpgradedtelegramApplicationTests {
 	
 	private final Logger log = LoggerFactory.getLogger(UpgradedtelegramApplicationTests.class);
 	
+	@Value("${spring.profiles.active}")
+	private String activeProfile;
+	
 	@Value("${contract.address}")
 	private String contractAddress;
 	
@@ -100,5 +103,9 @@ public class UpgradedtelegramApplicationTests {
 	
 	public Token getOwnerContract() {
 		return ownerContract;
+	}
+	
+	public String getActiveProfile() {
+		return activeProfile;
 	}
 }

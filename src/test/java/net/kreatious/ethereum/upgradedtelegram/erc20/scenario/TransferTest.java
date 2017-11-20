@@ -6,7 +6,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
@@ -23,9 +22,6 @@ import static org.junit.Assert.assertThat;
 public class TransferTest extends UpgradedtelegramApplicationTests {
     
     private final Logger log = LoggerFactory.getLogger(TransferTest.class);
-
-    @Value("${spring.profiles.active}")
-    private String activeProfile;
 
     /**
      * Tests transfer by contract owner to Bob
@@ -62,7 +58,7 @@ public class TransferTest extends UpgradedtelegramApplicationTests {
         assertThat(transferEventValues._value, equalTo(transferToBobInWei));
     
         // Only check for the balance updates in private blockchain (i.e., testrpc) since in testnet, we don't know when the transaction will be mined
-        if (activeProfile.equals("private")) {
+        if (getActiveProfile().equals("private")) {
 
             // Test that the owner's balance has been subtracted by the tokens transferred to Bob
             ownerBalance = ownerBalance.subtract(transferToBobInWei);
