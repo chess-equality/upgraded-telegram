@@ -74,7 +74,7 @@ public class TransferTest extends UpgradedtelegramApplicationTests {
         if (!getActiveProfile().equals("private")) {
             transferEventSubscription.unsubscribe();
         }
-        Thread.sleep(10000);
+        Thread.sleep(1000);
         if (!getActiveProfile().equals("private")) {
             assertTrue(transferEventSubscription.isUnsubscribed());
         }

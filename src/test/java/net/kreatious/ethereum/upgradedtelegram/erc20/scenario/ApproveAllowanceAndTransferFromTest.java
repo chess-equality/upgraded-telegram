@@ -104,7 +104,7 @@ public class ApproveAllowanceAndTransferFromTest extends UpgradedtelegramApplica
         if (!getActiveProfile().equals("private")) {
             approveEventSubscription.unsubscribe();
         }
-        Thread.sleep(10000);
+        Thread.sleep(1000);
         if (!getActiveProfile().equals("private")) {
             assertTrue(approveEventSubscription.isUnsubscribed());
         }
@@ -151,7 +151,7 @@ public class ApproveAllowanceAndTransferFromTest extends UpgradedtelegramApplica
         if (!getActiveProfile().equals("private")) {
             transferEventSubscription.unsubscribe();
         }
-        Thread.sleep(10000);
+        Thread.sleep(1000);
         if (!getActiveProfile().equals("private")) {
             assertTrue(transferEventSubscription.isUnsubscribed());
         }
