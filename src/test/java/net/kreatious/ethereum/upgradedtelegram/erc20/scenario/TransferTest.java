@@ -50,7 +50,7 @@ public class TransferTest extends UpgradedtelegramApplicationTests {
         
         log.info(">>>>>>>>>> transferToBob in Ether equivalent = " + transferToBob.toString());
         log.info(">>>>>>>>>> transferToBob in Wei equivalent = " + transferToBobInWei.toString());
-
+        
         CountDownLatch transferEventCountDownLatch = new CountDownLatch(1);
         Subscription transferEventSubscription = getOwnerContract().transferEventObservable(
                 DefaultBlockParameterName.EARLIEST,
@@ -69,12 +69,15 @@ public class TransferTest extends UpgradedtelegramApplicationTests {
         assertThat(transferEventValues._from, equalTo(getOwnerAddress()));
         assertThat(transferEventValues._to, equalTo(getBobAddress()));
         assertThat(transferEventValues._value, equalTo(transferToBobInWei));
-
+    
         transferEventCountDownLatch.await(DEFAULT_POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
-        transferEventSubscription.unsubscribe();
+        if (!getActiveProfile().equals("private")) {
+            transferEventSubscription.unsubscribe();
+        }
         Thread.sleep(10000);
-
-        assertTrue(transferEventSubscription.isUnsubscribed());
+        if (!getActiveProfile().equals("private")) {
+            assertTrue(transferEventSubscription.isUnsubscribed());
+        }
 
         // Test that the owner's supply has been subtracted by the tokens transferred to Bob
 
@@ -85,7 +88,7 @@ public class TransferTest extends UpgradedtelegramApplicationTests {
 
         assertThat(ownerSupplyAfter, equalTo(ownerSupply));
 
-        // Test that Bob's tokens has been increased by the transferred tokens
+        // Test that Bob's tokens have been increased by the transferred tokens
 
         bobTokens = bobTokens.add(transferToBobInWei);
 

@@ -101,10 +101,13 @@ public class ApproveAllowanceAndTransferFromTest extends UpgradedtelegramApplica
         assertThat(approvalEventValues._value, equalTo(allowance));
 
         approveEventCountDownLatch.await(DEFAULT_POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
-        approveEventSubscription.unsubscribe();
-        Thread.sleep(1000);
-
-        assertTrue(approveEventSubscription.isUnsubscribed());
+        if (!getActiveProfile().equals("private")) {
+            approveEventSubscription.unsubscribe();
+        }
+        Thread.sleep(10000);
+        if (!getActiveProfile().equals("private")) {
+            assertTrue(approveEventSubscription.isUnsubscribed());
+        }
 
         log.info(">>>>>>>>>> Alice's allowance = " + getOwnerContract().allowance(getOwnerAddress(), getAliceAddress()).send().toString());
 
@@ -145,10 +148,13 @@ public class ApproveAllowanceAndTransferFromTest extends UpgradedtelegramApplica
         assertThat(aliceTransferEventValues._value, equalTo(tokensToTransfer));
 
         transferEventCountDownLatch.await(DEFAULT_POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
-        transferEventSubscription.unsubscribe();
-        Thread.sleep(1000);
-
-        assertTrue(transferEventSubscription.isUnsubscribed());
+        if (!getActiveProfile().equals("private")) {
+            transferEventSubscription.unsubscribe();
+        }
+        Thread.sleep(10000);
+        if (!getActiveProfile().equals("private")) {
+            assertTrue(transferEventSubscription.isUnsubscribed());
+        }
 
         // Test that the owner's supply has been subtracted by the tokens transferred to Alice
 
@@ -159,7 +165,7 @@ public class ApproveAllowanceAndTransferFromTest extends UpgradedtelegramApplica
 
         assertThat(ownerSupplyAfter, equalTo(ownerSupply));
 
-        // Test that Alice's tokens has been increased by the transferred tokens
+        // Test that Alice's tokens have been increased by the transferred tokens
 
         aliceTokens = aliceTokens.add(tokensToTransfer);
 

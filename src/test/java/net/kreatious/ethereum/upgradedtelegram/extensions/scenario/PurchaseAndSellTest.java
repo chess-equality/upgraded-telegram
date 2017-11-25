@@ -92,10 +92,13 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         assertThat(transferEventValues._value, equalTo(totalTokensToPurchase));
 
         transferEventCountDownLatch.await(DEFAULT_POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
-        transferEventSubscription.unsubscribe();
-        Thread.sleep(1000);
-
-        assertTrue(transferEventSubscription.isUnsubscribed());
+        if (!getActiveProfile().equals("private")) {
+            transferEventSubscription.unsubscribe();
+        }
+        Thread.sleep(10000);
+        if (!getActiveProfile().equals("private")) {
+            assertTrue(transferEventSubscription.isUnsubscribed());
+        }
         
         // Test that the owner's supply has been subtracted by the tokens purchased by Alice
         
@@ -106,7 +109,7 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         
         assertThat(ownerSupplyAfter, equalTo(ownerSupply));
 
-        // Test that Alice's tokens has been increased by the purchased tokens
+        // Test that Alice's tokens have been increased by the purchased tokens
         
         aliceTokens = aliceTokens.add(totalTokensToPurchase);
         
@@ -168,10 +171,13 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         assertThat(transferEventValues._value, equalTo(totalTokensToSell));
 
         transferEventCountDownLatch.await(DEFAULT_POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
-        transferEventSubscription.unsubscribe();
-        Thread.sleep(1000);
-
-        assertTrue(transferEventSubscription.isUnsubscribed());
+        if (!getActiveProfile().equals("private")) {
+            transferEventSubscription.unsubscribe();
+        }
+        Thread.sleep(10000);
+        if (!getActiveProfile().equals("private")) {
+            assertTrue(transferEventSubscription.isUnsubscribed());
+        }
 
         // Test that the owner's supply has been increased by the tokens sold by Alice
 
@@ -182,7 +188,7 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
 
         assertThat(ownerSupplyAfter, equalTo(ownerSupply));
 
-        // Test that Alice's tokens has been subtracted by the sold tokens
+        // Test that Alice's tokens have been subtracted by the sold tokens
 
         aliceTokens = aliceTokens.subtract(totalTokensToSell);
 
