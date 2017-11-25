@@ -11,14 +11,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestContextManager;
 import org.web3j.crypto.Credentials;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import rx.Subscription;
+
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static net.kreatious.ethereum.upgradedtelegram.contract.generated.Token.load;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.web3j.tx.TransactionManager.DEFAULT_POLLING_FREQUENCY;
 
 @RunWith(Parameterized.class)
 @SpringBootTest
@@ -67,72 +74,100 @@ public class ApproveAllowanceAndTransferFromTest extends UpgradedtelegramApplica
     public void testApproveAllowanceAndTransferFrom() throws Exception {
     
         log.info("******************** START: Test approve allowance");
-        
+
+        BigInteger ownerSupply = getOwnerContract().balanceOf(getOwnerAddress()).send();
+        log.info(">>>>>>>>>> Owner's supply before = " + ownerSupply.toString());
+
+        BigInteger aliceTokens = getOwnerContract().balanceOf(getAliceAddress()).send();
+        log.info(">>>>>>>>>> Alice's tokens before = " + aliceTokens.toString());
+
         // Approve allowance limit for Alice
         TransactionReceipt approveReceipt = getOwnerContract().approve(getAliceAddress(), allowance).send();
-    
+
+        CountDownLatch approveEventCountDownLatch = new CountDownLatch(1);
+        Subscription approveEventSubscription = getOwnerContract().approvalEventObservable(
+                DefaultBlockParameterName.EARLIEST,
+                DefaultBlockParameterName.LATEST).subscribe(
+                        approvalEventResponse -> approveEventCountDownLatch.countDown()
+        );
+
         Token.ApprovalEventResponse approvalEventValues = getOwnerContract().getApprovalEvents(approveReceipt).get(0);
     
         log.info(">>>>>>>>>> value from approval event = " + approvalEventValues._value);
-    
+
         // Test approval event particulars
         assertThat(approvalEventValues._owner, equalTo(getOwnerAddress()));
         assertThat(approvalEventValues._spender, equalTo(getAliceAddress()));
         assertThat(approvalEventValues._value, equalTo(allowance));
-    
+
+        approveEventCountDownLatch.await(DEFAULT_POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
+        approveEventSubscription.unsubscribe();
+        Thread.sleep(1000);
+
+        assertTrue(approveEventSubscription.isUnsubscribed());
+
         log.info(">>>>>>>>>> Alice's allowance = " + getOwnerContract().allowance(getOwnerAddress(), getAliceAddress()).send().toString());
-    
-        // Only check for the balance updates in private blockchain (i.e., testrpc) since in testnet, we don't know when the transaction will be mined
-        if (getActiveProfile().equals("private")) {
-            // Test allowance limit for Alice
-            assertThat(getOwnerContract().allowance(getOwnerAddress(), getAliceAddress()).send(), equalTo(allowance));
-        }
-    
+
+        // Test allowance limit for Alice
+        assertThat(getOwnerContract().allowance(getOwnerAddress(), getAliceAddress()).send(), equalTo(allowance));
+
         log.info("******************** END: Test approve allowance");
-        
+
         log.info("******************** START: Test transfer from");
-        
-        BigInteger ownerBalance = getOwnerContract().balanceOf(getOwnerAddress()).send();
-        log.info(">>>>>>>>>> Owner's supply before = " + ownerBalance.toString());
-        
-        BigInteger aliceBalance = getOwnerContract().balanceOf(getAliceAddress()).send();
-        log.info(">>>>>>>>>> Alice's balance before = " + aliceBalance.toString());
-        
+
         // Test performing transfer as Alice on behalf of contract owner
-        
+
         Credentials alice = Credentials.create(getAlicePrivateKey());
-        
+
         // Alice requires her own contract instance
         Token aliceContract = load(getOwnerContract().getContractAddress(), getAdmin(), alice, GAS_PRICE, GAS_LIMIT);
-        
+
+        CountDownLatch transferEventCountDownLatch = new CountDownLatch(1);
+        Subscription transferEventSubscription = aliceContract.transferEventObservable(
+                DefaultBlockParameterName.EARLIEST,
+                DefaultBlockParameterName.LATEST).subscribe(
+                        transferEventResponse -> transferEventCountDownLatch.countDown()
+        );
+
         // Do transferFrom
         TransactionReceipt aliceTransferReceipt = aliceContract.transferFrom(
-            getOwnerAddress(),
-            getAliceAddress(),
-            tokensToTransfer).send();
-        
+                getOwnerAddress(),
+                getAliceAddress(),
+                tokensToTransfer).send();
+
         Token.TransferEventResponse aliceTransferEventValues = aliceContract.getTransferEvents(aliceTransferReceipt).get(0);
-    
+
         log.info(">>>>>>>>>> value from transfer event = " + aliceTransferEventValues._value);
-    
+
         // Test transfer event particulars
         assertThat(aliceTransferEventValues._from, equalTo(getOwnerAddress()));
         assertThat(aliceTransferEventValues._to, equalTo(getAliceAddress()));
         assertThat(aliceTransferEventValues._value, equalTo(tokensToTransfer));
-        
-        if (getActiveProfile().equals("private")) {
-            
-            // Test that the owner's balance has been subtracted by the tokens transferred to Alice
-            ownerBalance = ownerBalance.subtract(tokensToTransfer);
-            log.info(">>>>>>>>>> Owner's supply after = " + getOwnerContract().balanceOf(getOwnerAddress()).send().toString());
-            assertThat(getOwnerContract().balanceOf(getOwnerAddress()).send(), equalTo(ownerBalance));
-    
-            // Test that Alice's balance has been increased by the transferred tokens
-            aliceBalance = aliceBalance.add(tokensToTransfer);
-            log.info(">>>>>>>>>> Alice's balance after = " + getOwnerContract().balanceOf(getAliceAddress()).send().toString());
-            assertThat(getOwnerContract().balanceOf(getAliceAddress()).send(), equalTo(aliceBalance));
-        }
-        
+
+        transferEventCountDownLatch.await(DEFAULT_POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
+        transferEventSubscription.unsubscribe();
+        Thread.sleep(1000);
+
+        assertTrue(transferEventSubscription.isUnsubscribed());
+
+        // Test that the owner's supply has been subtracted by the tokens transferred to Alice
+
+        ownerSupply = ownerSupply.subtract(tokensToTransfer);
+
+        BigInteger ownerSupplyAfter = aliceContract.balanceOf(getOwnerAddress()).send();
+        log.info(">>>>>>>>>> Owner's supply after = " + ownerSupplyAfter.toString());
+
+        assertThat(ownerSupplyAfter, equalTo(ownerSupply));
+
+        // Test that Alice's tokens has been increased by the transferred tokens
+
+        aliceTokens = aliceTokens.add(tokensToTransfer);
+
+        BigInteger aliceTokensAfter = aliceContract.balanceOf(getAliceAddress()).send();
+        log.info(">>>>>>>>>> Alice's tokens after = " + aliceTokensAfter.toString());
+
+        assertThat(aliceTokensAfter, equalTo(aliceTokens));
+
         log.info("******************** END: Test transfer from");
     }
 }

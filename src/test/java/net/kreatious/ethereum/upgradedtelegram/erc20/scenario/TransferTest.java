@@ -8,14 +8,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.utils.Convert;
+import rx.Subscription;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.web3j.tx.TransactionManager.DEFAULT_POLLING_FREQUENCY;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -33,21 +39,28 @@ public class TransferTest extends UpgradedtelegramApplicationTests {
         
         log.info("******************** START: testTransferByOwner()");
         
-        BigInteger ownerBalance = getOwnerContract().balanceOf(getOwnerAddress()).send();
-        log.info(">>>>>>>>>> Owner's supply before = " + ownerBalance.toString());
+        BigInteger ownerSupply = getOwnerContract().balanceOf(getOwnerAddress()).send();
+        log.info(">>>>>>>>>> Owner's supply before = " + ownerSupply.toString());
     
-        BigInteger bobBalance = getOwnerContract().balanceOf(getBobAddress()).send();
-        log.info(">>>>>>>>>> Bob's balance before = " + bobBalance.toString());
-        
+        BigInteger bobTokens = getOwnerContract().balanceOf(getBobAddress()).send();
+        log.info(">>>>>>>>>> Bob's tokens before = " + bobTokens.toString());
+
         BigInteger transferToBob = BigInteger.valueOf(10_000);  // In Ether equivalent
         BigInteger transferToBobInWei = Convert.toWei(new BigDecimal(transferToBob), Convert.Unit.ETHER).toBigInteger();  // Convert to Wei equivalent
         
         log.info(">>>>>>>>>> transferToBob in Ether equivalent = " + transferToBob.toString());
         log.info(">>>>>>>>>> transferToBob in Wei equivalent = " + transferToBobInWei.toString());
-    
+
+        CountDownLatch transferEventCountDownLatch = new CountDownLatch(1);
+        Subscription transferEventSubscription = getOwnerContract().transferEventObservable(
+                DefaultBlockParameterName.EARLIEST,
+                DefaultBlockParameterName.LATEST).subscribe(
+                        transferEventResponse -> transferEventCountDownLatch.countDown()
+        );
+
         // Do transfer
         TransactionReceipt transactionReceipt = getOwnerContract().transfer(getBobAddress(), transferToBobInWei).send();
-        
+
         Token.TransferEventResponse transferEventValues = getOwnerContract().getTransferEvents(transactionReceipt).get(0);
     
         log.info(">>>>>>>>>> value from transfer event = " + transferEventValues._value);
@@ -56,20 +69,30 @@ public class TransferTest extends UpgradedtelegramApplicationTests {
         assertThat(transferEventValues._from, equalTo(getOwnerAddress()));
         assertThat(transferEventValues._to, equalTo(getBobAddress()));
         assertThat(transferEventValues._value, equalTo(transferToBobInWei));
-    
-        // Only check for the balance updates in private blockchain (i.e., testrpc) since in testnet, we don't know when the transaction will be mined
-        if (getActiveProfile().equals("private")) {
 
-            // Test that the owner's balance has been subtracted by the tokens transferred to Bob
-            ownerBalance = ownerBalance.subtract(transferToBobInWei);
-            log.info(">>>>>>>>>> Owner's supply after = " + getOwnerContract().balanceOf(getOwnerAddress()).send().toString());
-            assertThat(getOwnerContract().balanceOf(getOwnerAddress()).send(), equalTo(ownerBalance));
+        transferEventCountDownLatch.await(DEFAULT_POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
+        transferEventSubscription.unsubscribe();
+        Thread.sleep(10000);
 
-            // Test that Bob's balance has been increased by the transferred tokens
-            bobBalance = bobBalance.add(transferToBobInWei);
-            log.info(">>>>>>>>>> Bob's balance after = " + getOwnerContract().balanceOf(getBobAddress()).send().toString());
-            assertThat(getOwnerContract().balanceOf(getBobAddress()).send(), equalTo(bobBalance));
-        }
+        assertTrue(transferEventSubscription.isUnsubscribed());
+
+        // Test that the owner's supply has been subtracted by the tokens transferred to Bob
+
+        ownerSupply = ownerSupply.subtract(transferToBobInWei);
+
+        BigInteger ownerSupplyAfter = getOwnerContract().balanceOf(getOwnerAddress()).send();
+        log.info(">>>>>>>>>> Owner's supply after = " + ownerSupplyAfter.toString());
+
+        assertThat(ownerSupplyAfter, equalTo(ownerSupply));
+
+        // Test that Bob's tokens has been increased by the transferred tokens
+
+        bobTokens = bobTokens.add(transferToBobInWei);
+
+        BigInteger bobTokensAfter = getOwnerContract().balanceOf(getBobAddress()).send();
+        log.info(">>>>>>>>>> Bob's tokens after = " + bobTokensAfter.toString());
+
+        assertThat(bobTokensAfter, equalTo(bobTokens));
 
         log.info("******************** END: testTransferByOwner()");
     }
