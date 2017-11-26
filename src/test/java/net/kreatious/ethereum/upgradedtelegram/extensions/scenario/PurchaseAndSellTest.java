@@ -22,6 +22,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import static net.kreatious.ethereum.upgradedtelegram.contract.generated.Token.load;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -70,7 +71,7 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         log.info(">>>>>>>>>> Alice's Ether balance in Wei = " + ethGetBalance.getBalance().toString());
         log.info(">>>>>>>>>> Tokens to purchase in Wei = " + weiToPurchase.toString());
 
-        assertThat("Alice has insufficient Ether to purchase the tokens", true, equalTo(ethGetBalance.getBalance().compareTo(weiToPurchase) >= 0));
+        assertThat("Alice has insufficient Ether to purchase the tokens", ethGetBalance.getBalance(), greaterThanOrEqualTo(weiToPurchase));
 
         CountDownLatch transferEventCountDownLatch = new CountDownLatch(1);
         Subscription transferEventSubscription = aliceContract.transferEventObservable(
@@ -149,7 +150,7 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         log.info(">>>>>>>>>> totalTokensToSell = " + totalTokensToSell.toString());
 
         // Test first if Alice has capacity to sell the number of tokens
-        assertThat("Tokens to sell is greater than Alice's balance", true, equalTo(aliceTokens.compareTo(totalTokensToSell) >= 0));
+        assertThat("Tokens to sell are greater than Alice's balance", aliceTokens, greaterThanOrEqualTo(totalTokensToSell));
 
         CountDownLatch transferEventCountDownLatch = new CountDownLatch(1);
         Subscription transferEventSubscription = aliceContract.transferEventObservable(
