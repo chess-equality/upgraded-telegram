@@ -1,9 +1,6 @@
 package net.kreatious.ethereum.upgradedtelegram.extensions;
 
-import net.kreatious.ethereum.upgradedtelegram.extensions.scenario.DepositTest;
-import net.kreatious.ethereum.upgradedtelegram.extensions.scenario.PauseTest;
-import net.kreatious.ethereum.upgradedtelegram.extensions.scenario.PurchaseAndSellTest;
-import net.kreatious.ethereum.upgradedtelegram.extensions.scenario.ReserveTest;
+import net.kreatious.ethereum.upgradedtelegram.extensions.scenario.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
@@ -15,7 +12,8 @@ import org.junit.runners.Suite;
     PurchaseAndSellTest.class,
     PauseTest.class,
     DepositTest.class,
-    ReserveTest.class
+    ReserveTest.class,
+    MintTest.class
 })
 public class TestSuite_Extensions {
 }
