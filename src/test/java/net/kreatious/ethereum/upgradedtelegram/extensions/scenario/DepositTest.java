@@ -17,6 +17,7 @@ import java.math.BigInteger;
 
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
@@ -48,6 +49,10 @@ public class DepositTest extends UpgradedtelegramApplicationTests {
 
         // Do deposit
         TransactionReceipt transactionReceipt = getOwnerContract().deposit(weiToDeposit).send();
+        log.info(">>>>>>>>>> deposit status = " + transactionReceipt.getStatus());
+
+        // Test that deposit succeeded
+        assertEquals(transactionReceipt.getStatus(), "1");
 
         BigInteger gasUsed = transactionReceipt.getGasUsed();
         BigInteger gasPrice = getAdmin().ethGetTransactionByHash(transactionReceipt.getTransactionHash()).sendAsync().get().getTransaction().get().getGasPrice();

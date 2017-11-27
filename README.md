@@ -5,7 +5,7 @@
 2. This project already Includes the Maven wrapper (`mvnw`).
 3. A synced and running Ethereum client with accounts setup.
 4. Set parameters in `application-<profile>.properties`. Leave the smart contract address for now; it will be set in the next section.
-5. If using the testnet, note that `web3j` (https://web3j.io/), which this project is based, supports both Geth and Parity, however has had some issues dealing with asynchronous processing with Parity, at least with v3.1.1 used in this project.
+5. If using the testnet, note that `web3j` (https://web3j.io/), with which this project is using to connect with Ethereum, supports both Geth and Parity, however has had some issues dealing with asynchronous processing with Parity, at least with version 3.1.1 of `web3j` used in this project.
 6. The issues above were not experienced with Parity in Geth compatibility mode (`--geth`) and most probably also with a pure Geth client.
 7. Make sure the test accounts have sufficient Ether.
 

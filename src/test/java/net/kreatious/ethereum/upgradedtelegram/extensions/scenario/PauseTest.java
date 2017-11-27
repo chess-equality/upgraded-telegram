@@ -15,6 +15,7 @@ import java.math.BigInteger;
 
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
@@ -45,23 +46,29 @@ public class PauseTest extends UpgradedtelegramApplicationTests {
         log.info(">>>>>>>>>> transferToBob in Ether equivalent = " + transferToBob.toString());
         log.info(">>>>>>>>>> transferToBob in Wei equivalent = " + transferToBobInWei.toString());
 
-        BigInteger currentBlockNumber = getAdmin().ethBlockNumber().sendAsync().get().getBlockNumber();
-        log.info(">>>>>>>>>> current block number = " + currentBlockNumber.toString());
-
         // Pause contract
         TransactionReceipt setPausedReceipt = getOwnerContract().setPaused(true).send();
-        log.info(">>>>>>>>>> set paused block number = " + setPausedReceipt.getBlockNumber());
+        log.info(">>>>>>>>>> set paused status = " + setPausedReceipt.getStatus());
 
         // Test that set paused succeeded
-        assertThat(setPausedReceipt.getBlockNumber(), greaterThan(currentBlockNumber));
+        assertEquals(setPausedReceipt.getStatus(), "1");
 
         // Do transfer
-        TransactionReceipt transactionReceipt = getOwnerContract().transfer(getBobAddress(), transferToBobInWei).send();
+        // try - catch is for testrpc
+        try {
 
-        log.info(">>>>>>>>>> transfer block number = " + transactionReceipt.getBlockNumber());
+            TransactionReceipt transactionReceipt = getOwnerContract().transfer(getBobAddress(), transferToBobInWei).send();
+            log.info(">>>>>>>>>> transfer status = " + transactionReceipt.getStatus());
 
-        // Test that no transfer event was fired
-        assertThat("Transfer event has been fired", 0, equalTo(getOwnerContract().getTransferEvents(transactionReceipt).size()));
+            // Test that transfer has failed
+            assertEquals(transactionReceipt.getStatus(), "0");
+
+            // Test that no transfer event was fired
+            assertThat("Transfer event has been fired", 0, equalTo(getOwnerContract().getTransferEvents(transactionReceipt).size()));
+
+        } catch (Exception e) {
+            log.error("******************** EXCEPTION = " + e.getMessage());
+        }
 
         // Test that the owner's supply was not subtracted
 
@@ -79,10 +86,10 @@ public class PauseTest extends UpgradedtelegramApplicationTests {
 
         // Un-pause contract
         TransactionReceipt unPausedReceipt = getOwnerContract().setPaused(false).send();
-        log.info(">>>>>>>>>> un-paused block number = " + unPausedReceipt.getBlockNumber());
+        log.info(">>>>>>>>>> un-paused status = " + unPausedReceipt.getStatus());
 
         // Test that un-paused succeeded
-        assertThat(unPausedReceipt.getBlockNumber(), greaterThan(transactionReceipt.getBlockNumber()));
+        assertEquals(unPausedReceipt.getStatus(), "1");
 
         log.info("******************** END: testPauseThenTransfer()");
     }
