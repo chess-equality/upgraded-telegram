@@ -15,18 +15,13 @@ import org.web3j.crypto.Credentials;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import rx.Subscription;
 
 import java.math.BigInteger;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static net.kreatious.ethereum.upgradedtelegram.contract.generated.Token.load;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.web3j.tx.TransactionManager.DEFAULT_POLLING_FREQUENCY;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -73,13 +68,6 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
 
         assertThat("Alice has insufficient Ether to purchase the tokens", ethGetBalance.getBalance(), greaterThanOrEqualTo(weiToPurchase));
 
-        CountDownLatch transferEventCountDownLatch = new CountDownLatch(1);
-        Subscription transferEventSubscription = aliceContract.transferEventObservable(
-                DefaultBlockParameterName.EARLIEST,
-                DefaultBlockParameterName.LATEST).subscribe(
-                transferEventResponse -> transferEventCountDownLatch.countDown()
-        );
-
         // Do purchase
         TransactionReceipt transactionReceipt = aliceContract.purchase(weiToPurchase).send();
         
@@ -92,15 +80,6 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         assertThat(transferEventValues._to, equalTo(getAliceAddress()));
         assertThat(transferEventValues._value, equalTo(totalTokensToPurchase));
 
-        transferEventCountDownLatch.await(DEFAULT_POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
-        if (!getActiveProfile().equals("private")) {
-            transferEventSubscription.unsubscribe();
-        }
-        Thread.sleep(1000);
-        if (!getActiveProfile().equals("private")) {
-            assertTrue(transferEventSubscription.isUnsubscribed());
-        }
-        
         // Test that the owner's supply has been subtracted by the tokens purchased by Alice
         
         ownerSupply = ownerSupply.subtract(totalTokensToPurchase);
@@ -152,13 +131,6 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         // Test first if Alice has capacity to sell the number of tokens
         assertThat("Tokens to sell are greater than Alice's balance", aliceTokens, greaterThanOrEqualTo(totalTokensToSell));
 
-        CountDownLatch transferEventCountDownLatch = new CountDownLatch(1);
-        Subscription transferEventSubscription = aliceContract.transferEventObservable(
-                DefaultBlockParameterName.EARLIEST,
-                DefaultBlockParameterName.LATEST).subscribe(
-                transferEventResponse -> transferEventCountDownLatch.countDown()
-        );
-
         // Do sell
         TransactionReceipt transactionReceipt = aliceContract.sell(totalTokensToSell).send();
 
@@ -170,15 +142,6 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         assertThat(transferEventValues._from, equalTo(getAliceAddress()));
         assertThat(transferEventValues._to, equalTo(getOwnerAddress()));
         assertThat(transferEventValues._value, equalTo(totalTokensToSell));
-
-        transferEventCountDownLatch.await(DEFAULT_POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
-        if (!getActiveProfile().equals("private")) {
-            transferEventSubscription.unsubscribe();
-        }
-        Thread.sleep(1000);
-        if (!getActiveProfile().equals("private")) {
-            assertTrue(transferEventSubscription.isUnsubscribed());
-        }
 
         // Test that the owner's supply has been increased by the tokens sold by Alice
 

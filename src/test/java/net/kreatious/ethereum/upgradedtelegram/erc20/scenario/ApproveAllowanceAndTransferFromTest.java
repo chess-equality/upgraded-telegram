@@ -11,21 +11,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestContextManager;
 import org.web3j.crypto.Credentials;
-import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import rx.Subscription;
 
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static net.kreatious.ethereum.upgradedtelegram.contract.generated.Token.load;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.web3j.tx.TransactionManager.DEFAULT_POLLING_FREQUENCY;
 
 @RunWith(Parameterized.class)
 @SpringBootTest
@@ -84,13 +78,6 @@ public class ApproveAllowanceAndTransferFromTest extends UpgradedtelegramApplica
         // Approve allowance limit for Alice
         TransactionReceipt approveReceipt = getOwnerContract().approve(getAliceAddress(), allowance).send();
 
-        CountDownLatch approveEventCountDownLatch = new CountDownLatch(1);
-        Subscription approveEventSubscription = getOwnerContract().approvalEventObservable(
-                DefaultBlockParameterName.EARLIEST,
-                DefaultBlockParameterName.LATEST).subscribe(
-                        approvalEventResponse -> approveEventCountDownLatch.countDown()
-        );
-
         Token.ApprovalEventResponse approvalEventValues = getOwnerContract().getApprovalEvents(approveReceipt).get(0);
     
         log.info(">>>>>>>>>> value from approval event = " + approvalEventValues._value);
@@ -99,15 +86,6 @@ public class ApproveAllowanceAndTransferFromTest extends UpgradedtelegramApplica
         assertThat(approvalEventValues._owner, equalTo(getOwnerAddress()));
         assertThat(approvalEventValues._spender, equalTo(getAliceAddress()));
         assertThat(approvalEventValues._value, equalTo(allowance));
-
-        approveEventCountDownLatch.await(DEFAULT_POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
-        if (!getActiveProfile().equals("private")) {
-            approveEventSubscription.unsubscribe();
-        }
-        Thread.sleep(1000);
-        if (!getActiveProfile().equals("private")) {
-            assertTrue(approveEventSubscription.isUnsubscribed());
-        }
 
         log.info(">>>>>>>>>> Alice's allowance = " + getOwnerContract().allowance(getOwnerAddress(), getAliceAddress()).send().toString());
 
@@ -125,13 +103,6 @@ public class ApproveAllowanceAndTransferFromTest extends UpgradedtelegramApplica
         // Alice requires her own contract instance
         Token aliceContract = load(getOwnerContract().getContractAddress(), getAdmin(), alice, GAS_PRICE, GAS_LIMIT);
 
-        CountDownLatch transferEventCountDownLatch = new CountDownLatch(1);
-        Subscription transferEventSubscription = aliceContract.transferEventObservable(
-                DefaultBlockParameterName.EARLIEST,
-                DefaultBlockParameterName.LATEST).subscribe(
-                        transferEventResponse -> transferEventCountDownLatch.countDown()
-        );
-
         // Do transferFrom
         TransactionReceipt aliceTransferReceipt = aliceContract.transferFrom(
                 getOwnerAddress(),
@@ -146,15 +117,6 @@ public class ApproveAllowanceAndTransferFromTest extends UpgradedtelegramApplica
         assertThat(aliceTransferEventValues._from, equalTo(getOwnerAddress()));
         assertThat(aliceTransferEventValues._to, equalTo(getAliceAddress()));
         assertThat(aliceTransferEventValues._value, equalTo(tokensToTransfer));
-
-        transferEventCountDownLatch.await(DEFAULT_POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
-        if (!getActiveProfile().equals("private")) {
-            transferEventSubscription.unsubscribe();
-        }
-        Thread.sleep(1000);
-        if (!getActiveProfile().equals("private")) {
-            assertTrue(transferEventSubscription.isUnsubscribed());
-        }
 
         // Test that the owner's supply has been subtracted by the tokens transferred to Alice
 

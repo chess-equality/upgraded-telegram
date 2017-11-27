@@ -8,20 +8,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.utils.Convert;
-import rx.Subscription;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.web3j.tx.TransactionManager.DEFAULT_POLLING_FREQUENCY;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -51,13 +45,6 @@ public class TransferTest extends UpgradedtelegramApplicationTests {
         log.info(">>>>>>>>>> transferToBob in Ether equivalent = " + transferToBob.toString());
         log.info(">>>>>>>>>> transferToBob in Wei equivalent = " + transferToBobInWei.toString());
         
-        CountDownLatch transferEventCountDownLatch = new CountDownLatch(1);
-        Subscription transferEventSubscription = getOwnerContract().transferEventObservable(
-                DefaultBlockParameterName.EARLIEST,
-                DefaultBlockParameterName.LATEST).subscribe(
-                        transferEventResponse -> transferEventCountDownLatch.countDown()
-        );
-
         // Do transfer
         TransactionReceipt transactionReceipt = getOwnerContract().transfer(getBobAddress(), transferToBobInWei).send();
 
@@ -69,15 +56,6 @@ public class TransferTest extends UpgradedtelegramApplicationTests {
         assertThat(transferEventValues._from, equalTo(getOwnerAddress()));
         assertThat(transferEventValues._to, equalTo(getBobAddress()));
         assertThat(transferEventValues._value, equalTo(transferToBobInWei));
-    
-        transferEventCountDownLatch.await(DEFAULT_POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
-        if (!getActiveProfile().equals("private")) {
-            transferEventSubscription.unsubscribe();
-        }
-        Thread.sleep(1000);
-        if (!getActiveProfile().equals("private")) {
-            assertTrue(transferEventSubscription.isUnsubscribed());
-        }
 
         // Test that the owner's supply has been subtracted by the tokens transferred to Bob
 

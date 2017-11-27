@@ -33,7 +33,7 @@ public class DepositTest extends UpgradedtelegramApplicationTests {
     @Test
     public void testDeposit() throws Exception {
 
-        log.info("******************** START: Test deposit");
+        log.info("******************** START: testDeposit()");
 
         BigInteger weiToDeposit = Convert.toWei(BigDecimal.valueOf(0.01), Convert.Unit.ETHER).toBigInteger();  // In testnet, watch out if owner has Ether to deposit and pay gas
         log.info(">>>>>>>>>> weiToDeposit = " + weiToDeposit.toString());
@@ -69,6 +69,6 @@ public class DepositTest extends UpgradedtelegramApplicationTests {
 
         assertThat(ownerBalanceAfter, equalTo(ownerBalance));
 
-        log.info("******************** END: Test deposit");
+        log.info("******************** END: testDeposit()");
     }
 }
