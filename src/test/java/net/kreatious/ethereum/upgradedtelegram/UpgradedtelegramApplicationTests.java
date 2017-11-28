@@ -39,6 +39,11 @@ public class UpgradedtelegramApplicationTests {
 	@Value("${bob.address}")
 	private String bobAddress;
 
+	@Value("${john.privateKey}")
+	private String johnPrivateKey;
+	@Value("${john.address}")
+	private String johnAddress;
+
 	@Autowired
 	private Admin admin;
 	
@@ -92,7 +97,15 @@ public class UpgradedtelegramApplicationTests {
 	public String getBobAddress() {
 		return bobAddress;
 	}
-	
+
+	public String getJohnPrivateKey() {
+		return johnPrivateKey;
+	}
+
+	public String getJohnAddress() {
+		return johnAddress;
+	}
+
 	public Admin getAdmin() {
 		return admin;
 	}
