@@ -50,6 +50,10 @@ public class MintTest extends UpgradedtelegramApplicationTests {
 
         // Do minting
         TransactionReceipt transactionReceipt = getOwnerContract().mint(toMintInWei).send();
+        log.info(">>>>>>>>>> transfer status = " + transactionReceipt.getStatus());
+
+        // Test that transfer has succeeded
+        assertEquals(transactionReceipt.getStatus(), "1");
 
         Token.TransferEventResponse transferEventValues = getOwnerContract().getTransferEvents(transactionReceipt).get(0);
         log.info(">>>>>>>>>> value from transfer event = " + transferEventValues._value);
@@ -114,6 +118,7 @@ public class MintTest extends UpgradedtelegramApplicationTests {
         try {
 
             TransactionReceipt transactionReceipt = aliceContract.mint(toMintInWei).send();
+            log.info(">>>>>>>>>> mint status = " + transactionReceipt.getStatus());
 
             // Test that minting has failed
             assertEquals(transactionReceipt.getStatus(), "0");

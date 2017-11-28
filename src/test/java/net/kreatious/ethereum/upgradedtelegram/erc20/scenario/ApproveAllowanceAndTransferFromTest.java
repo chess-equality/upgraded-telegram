@@ -19,6 +19,7 @@ import java.util.Collection;
 
 import static net.kreatious.ethereum.upgradedtelegram.contract.generated.Token.load;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
@@ -77,9 +78,12 @@ public class ApproveAllowanceAndTransferFromTest extends UpgradedtelegramApplica
 
         // Approve allowance limit for Alice
         TransactionReceipt approveReceipt = getOwnerContract().approve(getAliceAddress(), allowance).send();
+        log.info(">>>>>>>>>> approve status = " + approveReceipt.getStatus());
+
+        // Test that approve has succeeded
+        assertEquals(approveReceipt.getStatus(), "1");
 
         Token.ApprovalEventResponse approvalEventValues = getOwnerContract().getApprovalEvents(approveReceipt).get(0);
-    
         log.info(">>>>>>>>>> value from approval event = " + approvalEventValues._value);
 
         // Test approval event particulars
@@ -109,8 +113,12 @@ public class ApproveAllowanceAndTransferFromTest extends UpgradedtelegramApplica
                 getAliceAddress(),
                 tokensToTransfer).send();
 
-        Token.TransferEventResponse aliceTransferEventValues = aliceContract.getTransferEvents(aliceTransferReceipt).get(0);
+        log.info(">>>>>>>>>> transferFrom status = " + aliceTransferReceipt.getStatus());
 
+        // Test that transfer has succeeded
+        assertEquals(aliceTransferReceipt.getStatus(), "1");
+
+        Token.TransferEventResponse aliceTransferEventValues = aliceContract.getTransferEvents(aliceTransferReceipt).get(0);
         log.info(">>>>>>>>>> value from transfer event = " + aliceTransferEventValues._value);
 
         // Test transfer event particulars

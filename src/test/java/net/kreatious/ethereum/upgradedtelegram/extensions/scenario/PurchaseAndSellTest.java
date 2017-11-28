@@ -21,6 +21,7 @@ import java.math.BigInteger;
 import static net.kreatious.ethereum.upgradedtelegram.contract.generated.Token.load;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
@@ -70,9 +71,12 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
 
         // Do purchase
         TransactionReceipt transactionReceipt = aliceContract.purchase(weiToPurchase).send();
-        
+        log.info(">>>>>>>>>> purchase status = " + transactionReceipt.getStatus());
+
+        // Test that transfer has succeeded
+        assertEquals(transactionReceipt.getStatus(), "1");
+
         Token.TransferEventResponse transferEventValues = aliceContract.getTransferEvents(transactionReceipt).get(0);
-    
         log.info(">>>>>>>>>> value from transfer event = " + transferEventValues._value);
         
         // Test transfer event particulars
@@ -133,9 +137,12 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
 
         // Do sell
         TransactionReceipt transactionReceipt = aliceContract.sell(totalTokensToSell).send();
+        log.info(">>>>>>>>>> sell status = " + transactionReceipt.getStatus());
+
+        // Test that transfer has succeeded
+        assertEquals(transactionReceipt.getStatus(), "1");
 
         Token.TransferEventResponse transferEventValues = aliceContract.getTransferEvents(transactionReceipt).get(0);
-
         log.info(">>>>>>>>>> value from transfer event = " + transferEventValues._value);
 
         // Test transfer event particulars
