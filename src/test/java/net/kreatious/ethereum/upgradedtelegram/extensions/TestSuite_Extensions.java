@@ -11,7 +11,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({
     PurchaseAndSellTest.class,
     PauseTest.class,
-    DepositTest.class,
+    DepositAndWithdrawTest.class,
     ReserveTest.class,
     MintTest.class
 })
