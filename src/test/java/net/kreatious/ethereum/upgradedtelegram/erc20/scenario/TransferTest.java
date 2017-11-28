@@ -39,7 +39,7 @@ public class TransferTest extends UpgradedtelegramApplicationTests {
         BigInteger bobTokens = getOwnerContract().balanceOf(getBobAddress()).send();
         log.info(">>>>>>>>>> Bob's tokens before = " + bobTokens.toString());
 
-        BigInteger transferToBob = BigInteger.valueOf(10_000);  // In Ether equivalent
+        BigInteger transferToBob = BigInteger.valueOf(10_000);  // 10,000 tokens, in Ether equivalent
         BigInteger transferToBobInWei = Convert.toWei(new BigDecimal(transferToBob), Convert.Unit.ETHER).toBigInteger();  // Convert to Wei equivalent
         
         log.info(">>>>>>>>>> transferToBob in Ether equivalent = " + transferToBob.toString());

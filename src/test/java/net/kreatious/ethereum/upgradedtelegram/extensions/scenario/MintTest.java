@@ -97,10 +97,10 @@ public class MintTest extends UpgradedtelegramApplicationTests {
         log.info(">>>>>>>>>> Owner's supply before = " + ownerSupply.toString());
 
         BigInteger toMint = BigInteger.valueOf(10_000_000);  // 10 million tokens, in Ether equivalent
-        log.info(">>>>>>>>>> Tokens to mine in Ether equivalent = " + toMint.toString());
+        log.info(">>>>>>>>>> Tokens to mint in Ether equivalent = " + toMint.toString());
 
         BigInteger toMintInWei = Convert.toWei(new BigDecimal(toMint), Convert.Unit.ETHER).toBigInteger();  // Convert to Wei equivalent
-        log.info(">>>>>>>>>> Tokens to mine in Wei equivalent = " + toMintInWei.toString());
+        log.info(">>>>>>>>>> Tokens to mint in Wei equivalent = " + toMintInWei.toString());
 
         // Test minting as Alice
 
@@ -118,8 +118,8 @@ public class MintTest extends UpgradedtelegramApplicationTests {
             // Test that minting has failed
             assertEquals(transactionReceipt.getStatus(), "0");
 
-            // Test that no transfer event was fired
-            assertThat("Transfer event has been fired", 0, equalTo(getOwnerContract().getTransferEvents(transactionReceipt).size()));
+            // Test that no transfer event has been fired
+            assertThat("Transfer event has been fired", 0, equalTo(aliceContract.getTransferEvents(transactionReceipt).size()));
 
         } catch(Exception e) {
             log.error("******************** EXCEPTION = " + e.getMessage());

@@ -36,7 +36,7 @@ public class DepositTest extends UpgradedtelegramApplicationTests {
 
         log.info("******************** START: testDeposit()");
 
-        BigInteger weiToDeposit = Convert.toWei(BigDecimal.valueOf(0.01), Convert.Unit.ETHER).toBigInteger();  // In testnet, watch out if owner has Ether to deposit and pay gas
+        BigInteger weiToDeposit = Convert.toWei(BigDecimal.valueOf(0.01), Convert.Unit.ETHER).toBigInteger();  // In Wei equivalent. In testnet, watch out if owner has sufficient Ether to deposit and pay gas
         log.info(">>>>>>>>>> weiToDeposit = " + weiToDeposit.toString());
 
         // Test first if owner has sufficient Ether to deposit
@@ -51,7 +51,7 @@ public class DepositTest extends UpgradedtelegramApplicationTests {
         TransactionReceipt transactionReceipt = getOwnerContract().deposit(weiToDeposit).send();
         log.info(">>>>>>>>>> deposit status = " + transactionReceipt.getStatus());
 
-        // Test that deposit succeeded
+        // Test that deposit has succeeded
         assertEquals(transactionReceipt.getStatus(), "1");
 
         BigInteger gasUsed = transactionReceipt.getGasUsed();

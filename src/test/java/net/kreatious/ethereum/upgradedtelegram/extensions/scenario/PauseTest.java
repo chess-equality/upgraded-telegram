@@ -13,7 +13,6 @@ import org.web3j.utils.Convert;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 
-import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -40,7 +39,7 @@ public class PauseTest extends UpgradedtelegramApplicationTests {
         BigInteger bobTokens = getOwnerContract().balanceOf(getBobAddress()).send();
         log.info(">>>>>>>>>> Bob's tokens before = " + bobTokens.toString());
 
-        BigInteger transferToBob = BigInteger.valueOf(10_000);  // In Ether equivalent
+        BigInteger transferToBob = BigInteger.valueOf(10_000);  // 10,000 tokens, in Ether equivalent
         BigInteger transferToBobInWei = Convert.toWei(new BigDecimal(transferToBob), Convert.Unit.ETHER).toBigInteger();  // Convert to Wei equivalent
 
         log.info(">>>>>>>>>> transferToBob in Ether equivalent = " + transferToBob.toString());
@@ -63,7 +62,7 @@ public class PauseTest extends UpgradedtelegramApplicationTests {
             // Test that transfer has failed
             assertEquals(transactionReceipt.getStatus(), "0");
 
-            // Test that no transfer event was fired
+            // Test that no transfer event has been fired
             assertThat("Transfer event has been fired", 0, equalTo(getOwnerContract().getTransferEvents(transactionReceipt).size()));
 
         } catch (Exception e) {

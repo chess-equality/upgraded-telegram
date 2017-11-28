@@ -33,7 +33,7 @@ public class ApproveAllowanceAndTransferFromTest extends UpgradedtelegramApplica
     @Parameterized.Parameters
     public static Collection<Object[]> tokensToTransferList() {
         return Arrays.asList(new Object[][] {
-            { BigInteger.valueOf(50_000), BigInteger.valueOf(25_000) },
+            { BigInteger.valueOf(50_000), BigInteger.valueOf(25_000) },  // All in Wei equivalent
             { BigInteger.valueOf(50_000), BigInteger.valueOf(50_000) }
         });
     }

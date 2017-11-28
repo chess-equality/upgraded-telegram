@@ -55,7 +55,7 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         Token aliceContract = load(getOwnerContract().getContractAddress(), getAdmin(), alice, GAS_PRICE, GAS_LIMIT);
         
         BigInteger tokensPerWei = BigInteger.valueOf(Long.parseLong(tokensPerWeiProp));
-        BigInteger weiToPurchase = BigInteger.valueOf(1_000_000);  // In testnet, watch out if Alice has Ether to purchase and pay gas
+        BigInteger weiToPurchase = BigInteger.valueOf(1_000_000);  // In Wei equivalent. In testnet, watch out if Alice has sufficient Ether to purchase and pay gas
         
         BigInteger totalTokensToPurchase = weiToPurchase.multiply(tokensPerWei);
         log.info(">>>>>>>>>> totalTokensToPurchase = " + totalTokensToPurchase.toString());
@@ -71,7 +71,7 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         // Do purchase
         TransactionReceipt transactionReceipt = aliceContract.purchase(weiToPurchase).send();
         
-        Token.TransferEventResponse transferEventValues = getOwnerContract().getTransferEvents(transactionReceipt).get(0);
+        Token.TransferEventResponse transferEventValues = aliceContract.getTransferEvents(transactionReceipt).get(0);
     
         log.info(">>>>>>>>>> value from transfer event = " + transferEventValues._value);
         
@@ -123,7 +123,7 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         Token aliceContract = load(getOwnerContract().getContractAddress(), getAdmin(), alice, GAS_PRICE, GAS_LIMIT);
 
         BigInteger tokensPerWei = BigInteger.valueOf(Long.parseLong(tokensPerWeiProp));
-        BigInteger weiToSell = BigInteger.valueOf(1_000_000);
+        BigInteger weiToSell = BigInteger.valueOf(1_000_000);  // In Wei equivalent
 
         BigInteger totalTokensToSell = weiToSell.multiply(tokensPerWei);
         log.info(">>>>>>>>>> totalTokensToSell = " + totalTokensToSell.toString());
@@ -134,7 +134,7 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         // Do sell
         TransactionReceipt transactionReceipt = aliceContract.sell(totalTokensToSell).send();
 
-        Token.TransferEventResponse transferEventValues = getOwnerContract().getTransferEvents(transactionReceipt).get(0);
+        Token.TransferEventResponse transferEventValues = aliceContract.getTransferEvents(transactionReceipt).get(0);
 
         log.info(">>>>>>>>>> value from transfer event = " + transferEventValues._value);
 
