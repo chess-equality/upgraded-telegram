@@ -39,9 +39,9 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
      * @throws Exception
      */
     @Test
-    public void testPurchase() throws Exception {
+    public void test1Purchase() throws Exception {
         
-        log.info("******************** START: testPurchase()");
+        log.info("******************** START: test1Purchase()");
         
         BigInteger ownerSupply = getOwnerContract().balanceOf(getOwnerAddress()).send();
         log.info(">>>>>>>>>> Owner's supply before = " + ownerSupply.toString());
@@ -98,7 +98,7 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         
         assertThat(aliceTokensAfter, equalTo(aliceTokens));
         
-        log.info("******************** END: testPurchase()");
+        log.info("******************** END: test1Purchase()");
     }
 
     /**
@@ -107,9 +107,9 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
      * @throws Exception
      */
     @Test
-    public void testSell() throws Exception {
+    public void test2Sell() throws Exception {
 
-        log.info("******************** START: testSell()");
+        log.info("******************** START: test2Sell()");
 
         BigInteger ownerSupply = getOwnerContract().balanceOf(getOwnerAddress()).send();
         log.info(">>>>>>>>>> Owner's supply before = " + ownerSupply.toString());
@@ -161,6 +161,6 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
 
         assertThat(aliceTokensAfter, equalTo(aliceTokens));
 
-        log.info("******************** END: testSell()");
+        log.info("******************** END: test2Sell()");
     }
 }
