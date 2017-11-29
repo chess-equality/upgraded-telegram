@@ -38,6 +38,7 @@ public class ReserveTest extends UpgradedtelegramApplicationTests {
         log.info(">>>>>>>>>> New number of tokens to reserve in Wei equivalent = " + toReserveInWei.toString());
 
         TransactionReceipt setReservedReceipt = getOwnerContract().setReserved(toReserveInWei).send();
+        log.info(">>>>>>>>>> set reserved tx hash = " + setReservedReceipt.getTransactionHash());
         log.info(">>>>>>>>>> set reserved status = " + setReservedReceipt.getStatus());
 
         // Test that set reserved succeeded

@@ -47,6 +47,7 @@ public class PauseTest extends UpgradedtelegramApplicationTests {
 
         // Pause contract
         TransactionReceipt setPausedReceipt = getOwnerContract().setPaused(true).send();
+        log.info(">>>>>>>>>> set paused tx hash = " + setPausedReceipt.getTransactionHash());
         log.info(">>>>>>>>>> set paused status = " + setPausedReceipt.getStatus());
 
         // Test that set paused succeeded
@@ -57,6 +58,7 @@ public class PauseTest extends UpgradedtelegramApplicationTests {
         try {
 
             TransactionReceipt transactionReceipt = getOwnerContract().transfer(getBobAddress(), transferToBobInWei).send();
+            log.info(">>>>>>>>>> transfer tx hash = " + transactionReceipt.getTransactionHash());
             log.info(">>>>>>>>>> transfer status = " + transactionReceipt.getStatus());
 
             // Test that transfer has failed
@@ -85,6 +87,7 @@ public class PauseTest extends UpgradedtelegramApplicationTests {
 
         // Un-pause contract
         TransactionReceipt unPausedReceipt = getOwnerContract().setPaused(false).send();
+        log.info(">>>>>>>>>> un-paused tx hash = " + unPausedReceipt.getTransactionHash());
         log.info(">>>>>>>>>> un-paused status = " + unPausedReceipt.getStatus());
 
         // Test that un-paused succeeded

@@ -55,6 +55,7 @@ public class DepositAndWithdrawTest extends UpgradedtelegramApplicationTests {
 
         // Do deposit
         TransactionReceipt transactionReceipt = getOwnerContract().deposit(weiToDeposit).send();
+        log.info(">>>>>>>>>> deposit tx hash = " + transactionReceipt.getTransactionHash());
         log.info(">>>>>>>>>> deposit status = " + transactionReceipt.getStatus());
 
         // Test that deposit has succeeded
@@ -65,7 +66,6 @@ public class DepositAndWithdrawTest extends UpgradedtelegramApplicationTests {
         BigInteger gasPrice = getAdmin().ethGetTransactionByHash(transactionReceipt.getTransactionHash()).sendAsync().get().getTransaction().get().getGasPrice();
         BigInteger totalTxFee = gasUsed.multiply(gasPrice);
 
-        log.info(">>>>>>>>>> deposit tx hash = " + transactionReceipt.getTransactionHash());
         log.info(">>>>>>>>>> deposit gas used = " + gasUsed.toString());
         log.info(">>>>>>>>>> deposit gas price = " + gasPrice.toString());
         log.info(">>>>>>>>>> deposit total tx fee = " + totalTxFee.toString());
@@ -104,6 +104,7 @@ public class DepositAndWithdrawTest extends UpgradedtelegramApplicationTests {
 
         // Do withdrawal
         TransactionReceipt transactionReceipt = getOwnerContract().withdraw(weiToWithdraw).send();
+        log.info(">>>>>>>>>> withdraw tx hash = " + transactionReceipt.getTransactionHash());
         log.info(">>>>>>>>>> withdraw status = " + transactionReceipt.getStatus());
 
         // Test that withdrawal has succeeded
@@ -114,7 +115,6 @@ public class DepositAndWithdrawTest extends UpgradedtelegramApplicationTests {
         BigInteger gasPrice = getAdmin().ethGetTransactionByHash(transactionReceipt.getTransactionHash()).sendAsync().get().getTransaction().get().getGasPrice();
         BigInteger totalTxFee = gasUsed.multiply(gasPrice);
 
-        log.info(">>>>>>>>>> withdraw tx hash = " + transactionReceipt.getTransactionHash());
         log.info(">>>>>>>>>> withdraw gas used = " + gasUsed.toString());
         log.info(">>>>>>>>>> withdraw gas price = " + gasPrice.toString());
         log.info(">>>>>>>>>> withdraw total tx fee = " + totalTxFee.toString());
@@ -162,6 +162,7 @@ public class DepositAndWithdrawTest extends UpgradedtelegramApplicationTests {
         try {
 
             TransactionReceipt transactionReceipt = bobContract.deposit(weiToDeposit).send();
+            log.info(">>>>>>>>>> deposit tx hash = " + transactionReceipt.getTransactionHash());
             log.info(">>>>>>>>>> deposit status = " + transactionReceipt.getStatus());
 
             // Test that deposit has failed
@@ -211,6 +212,7 @@ public class DepositAndWithdrawTest extends UpgradedtelegramApplicationTests {
         try {
 
             TransactionReceipt transactionReceipt = bobContract.withdraw(weiToWithdraw).send();
+            log.info(">>>>>>>>>> withdraw tx hash = " + transactionReceipt.getTransactionHash());
             log.info(">>>>>>>>>> withdraw status = " + transactionReceipt.getStatus());
 
             // Test that withdraw has failed

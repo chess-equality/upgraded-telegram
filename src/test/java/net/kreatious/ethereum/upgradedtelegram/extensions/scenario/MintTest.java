@@ -50,6 +50,7 @@ public class MintTest extends UpgradedtelegramApplicationTests {
 
         // Do minting
         TransactionReceipt transactionReceipt = getOwnerContract().mint(toMintInWei).send();
+        log.info(">>>>>>>>>> mint tx hash = " + transactionReceipt.getTransactionHash());
         log.info(">>>>>>>>>> mint status = " + transactionReceipt.getStatus());
 
         // Test that transfer has succeeded
@@ -117,6 +118,7 @@ public class MintTest extends UpgradedtelegramApplicationTests {
         try {
 
             TransactionReceipt transactionReceipt = aliceContract.mint(toMintInWei).send();
+            log.info(">>>>>>>>>> mint tx hash = " + transactionReceipt.getTransactionHash());
             log.info(">>>>>>>>>> mint status = " + transactionReceipt.getStatus());
 
             // Test that minting has failed

@@ -53,6 +53,7 @@ public class TransferTest extends UpgradedtelegramApplicationTests {
         
         // Do transfer by contract owner
         TransactionReceipt transactionReceipt = getOwnerContract().transfer(getBobAddress(), transferToBobInWei).send();
+        log.info(">>>>>>>>>> transfer tx hash = " + transactionReceipt.getTransactionHash());
         log.info(">>>>>>>>>> transfer status = " + transactionReceipt.getStatus());
 
         // Test that transfer has succeeded
@@ -118,6 +119,7 @@ public class TransferTest extends UpgradedtelegramApplicationTests {
 
         // Do transfer by Bob to Alice
         TransactionReceipt transactionReceipt = bobContract.transfer(getAliceAddress(), transferToAliceInWei).send();
+        log.info(">>>>>>>>>> transfer tx hash = " + transactionReceipt.getTransactionHash());
         log.info(">>>>>>>>>> transfer status = " + transactionReceipt.getStatus());
 
         // Test that transfer has succeeded
@@ -187,6 +189,7 @@ public class TransferTest extends UpgradedtelegramApplicationTests {
 
         // Do transfer by Bob to himself
         TransactionReceipt transactionReceipt = bobContract.transfer(getBobAddress(), transferToHimselfInWei).send();
+        log.info(">>>>>>>>>> transfer tx hash = " + transactionReceipt.getTransactionHash());
         log.info(">>>>>>>>>> transfer status = " + transactionReceipt.getStatus());
 
         // Test that transfer has succeeded
@@ -248,6 +251,7 @@ public class TransferTest extends UpgradedtelegramApplicationTests {
         try {
 
             TransactionReceipt transactionReceipt = johnContract.transfer(getJohnAddress(), transferToJohnInWei).send();
+            log.info(">>>>>>>>>> transfer tx hash = " + transactionReceipt.getTransactionHash());
             log.info(">>>>>>>>>> transfer status = " + transactionReceipt.getStatus());
 
             // Test that transfer has not succeeded

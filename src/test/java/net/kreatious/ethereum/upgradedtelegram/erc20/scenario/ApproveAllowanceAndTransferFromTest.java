@@ -78,6 +78,7 @@ public class ApproveAllowanceAndTransferFromTest extends UpgradedtelegramApplica
 
         // Approve allowance limit for Alice
         TransactionReceipt approveReceipt = getOwnerContract().approve(getAliceAddress(), allowance).send();
+        log.info(">>>>>>>>>> approve tx hash = " + approveReceipt.getTransactionHash());
         log.info(">>>>>>>>>> approve status = " + approveReceipt.getStatus());
 
         // Test that approve has succeeded
@@ -112,6 +113,7 @@ public class ApproveAllowanceAndTransferFromTest extends UpgradedtelegramApplica
                 getAliceAddress(),
                 tokensToTransfer).send();
 
+        log.info(">>>>>>>>>> transferFrom tx hash = " + aliceTransferReceipt.getTransactionHash());
         log.info(">>>>>>>>>> transferFrom status = " + aliceTransferReceipt.getStatus());
 
         // Test that transfer has succeeded
