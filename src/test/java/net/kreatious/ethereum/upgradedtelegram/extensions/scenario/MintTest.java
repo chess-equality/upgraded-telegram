@@ -111,7 +111,7 @@ public class MintTest extends UpgradedtelegramApplicationTests {
 
         // Alice requires her own contract instance
         Credentials alice = Credentials.create(getAlicePrivateKey());
-        Token aliceContract = load(getOwnerContract().getContractAddress(), getAdmin(), alice, GAS_PRICE, GAS_LIMIT);
+        Token aliceContract = load(getContractAddress(), getAdmin(), alice, getGasPrice(), getGasLimit());
 
         // Do minting
         // try - catch is for testrpc

@@ -115,7 +115,7 @@ public class TransferTest extends UpgradedtelegramApplicationTests {
 
         // Bob requires his own contract instance
         Credentials bob = Credentials.create(getBobPrivateKey());
-        Token bobContract = load(getOwnerContract().getContractAddress(), getAdmin(), bob, GAS_PRICE, GAS_LIMIT);
+        Token bobContract = load(getContractAddress(), getAdmin(), bob, getGasPrice(), getGasLimit());
 
         // Do transfer by Bob to Alice
         TransactionReceipt transactionReceipt = bobContract.transfer(getAliceAddress(), transferToAliceInWei).send();
@@ -185,7 +185,7 @@ public class TransferTest extends UpgradedtelegramApplicationTests {
 
         // Bob requires his own contract instance
         Credentials bob = Credentials.create(getBobPrivateKey());
-        Token bobContract = load(getOwnerContract().getContractAddress(), getAdmin(), bob, GAS_PRICE, GAS_LIMIT);
+        Token bobContract = load(getContractAddress(), getAdmin(), bob, getGasPrice(), getGasLimit());
 
         // Do transfer by Bob to himself
         TransactionReceipt transactionReceipt = bobContract.transfer(getBobAddress(), transferToHimselfInWei).send();
@@ -244,7 +244,7 @@ public class TransferTest extends UpgradedtelegramApplicationTests {
 
         // John requires his own contract instance
         Credentials john = Credentials.create(getJohnPrivateKey());
-        Token johnContract = load(getOwnerContract().getContractAddress(), getAdmin(), john, GAS_PRICE, GAS_LIMIT);
+        Token johnContract = load(getContractAddress(), getAdmin(), john, getGasPrice(), getGasLimit());
 
         // Do transfer by John to himself
         // try - catch is for testrpc

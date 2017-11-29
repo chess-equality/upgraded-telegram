@@ -17,10 +17,13 @@ import static org.junit.Assert.assertTrue;
 public class UpgradedtelegramApplicationTests {
 	
 	private final Logger log = LoggerFactory.getLogger(UpgradedtelegramApplicationTests.class);
-	
-	@Value("${spring.profiles.active}")
-	private String activeProfile;
-	
+
+	@Value("${gas.price}")
+	private long gasPrice;
+
+	@Value("${gas.limit}")
+	private long gasLimit;
+
 	@Value("${contract.address}")
 	private String contractAddress;
 	
@@ -49,10 +52,7 @@ public class UpgradedtelegramApplicationTests {
 	
 	private Credentials owner;
 	private Token ownerContract;
-	
-	public static final BigInteger GAS_PRICE = BigInteger.valueOf(22_000_000_000L);
-	public static final BigInteger GAS_LIMIT = BigInteger.valueOf(4_300_000);
-	
+
 	@Before
 	public void setUp() throws Exception {
 		
@@ -63,13 +63,29 @@ public class UpgradedtelegramApplicationTests {
 		owner = Credentials.create(ownerPrivateKey);
 		
 		// Load contract
-		ownerContract = load(contractAddress, admin, owner, GAS_PRICE, GAS_LIMIT);
+		ownerContract = load(contractAddress, admin, owner, getGasPrice(), getGasLimit());
 		
 		// Test if contract is valid
 		assertTrue(ownerContract.isValid());
 		log.info("########## Contract loaded and valid");
 	}
-	
+
+	public Admin getAdmin() {
+		return admin;
+	}
+
+	public BigInteger getGasPrice() {
+		return BigInteger.valueOf(gasPrice);
+	}
+
+	public BigInteger getGasLimit() {
+		return BigInteger.valueOf(gasLimit);
+	}
+
+	public Token getOwnerContract() {
+		return ownerContract;
+	}
+
 	public String getContractAddress() {
 		return contractAddress;
 	}
@@ -104,21 +120,5 @@ public class UpgradedtelegramApplicationTests {
 
 	public String getJohnAddress() {
 		return johnAddress;
-	}
-
-	public Admin getAdmin() {
-		return admin;
-	}
-	
-	public Credentials getOwner() {
-		return owner;
-	}
-	
-	public Token getOwnerContract() {
-		return ownerContract;
-	}
-	
-	public String getActiveProfile() {
-		return activeProfile;
 	}
 }

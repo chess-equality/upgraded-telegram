@@ -53,7 +53,7 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
 
         // Alice requires her own contract instance
         Credentials alice = Credentials.create(getAlicePrivateKey());
-        Token aliceContract = load(getOwnerContract().getContractAddress(), getAdmin(), alice, GAS_PRICE, GAS_LIMIT);
+        Token aliceContract = load(getContractAddress(), getAdmin(), alice, getGasPrice(), getGasLimit());
         
         BigInteger tokensPerWei = BigInteger.valueOf(Long.parseLong(tokensPerWeiProp));
         BigInteger weiToPurchase = BigInteger.valueOf(1_000_000);  // In Wei equivalent. In testnet, watch out if Alice has sufficient Ether to purchase and pay gas
@@ -124,7 +124,7 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
 
         // Alice requires her own contract instance
         Credentials alice = Credentials.create(getAlicePrivateKey());
-        Token aliceContract = load(getOwnerContract().getContractAddress(), getAdmin(), alice, GAS_PRICE, GAS_LIMIT);
+        Token aliceContract = load(getContractAddress(), getAdmin(), alice, getGasPrice(), getGasLimit());
 
         BigInteger tokensPerWei = BigInteger.valueOf(Long.parseLong(tokensPerWeiProp));
         BigInteger weiToSell = BigInteger.valueOf(1_000_000);  // In Wei equivalent
@@ -184,7 +184,7 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
 
         // John requires his own contract instance
         Credentials john = Credentials.create(getJohnPrivateKey());
-        Token johnContract = load(getOwnerContract().getContractAddress(), getAdmin(), john, GAS_PRICE, GAS_LIMIT);
+        Token johnContract = load(getContractAddress(), getAdmin(), john, getGasPrice(), getGasLimit());
 
         BigInteger tokensPerWei = BigInteger.valueOf(Long.parseLong(tokensPerWeiProp));
         BigInteger weiToSell = BigInteger.valueOf(1_000_000);  // In Wei equivalent
@@ -254,7 +254,7 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
 
         // Alice requires her own contract instance
         Credentials alice = Credentials.create(getAlicePrivateKey());
-        Token aliceContract = load(getOwnerContract().getContractAddress(), getAdmin(), alice, GAS_PRICE, GAS_LIMIT);
+        Token aliceContract = load(getContractAddress(), getAdmin(), alice, getGasPrice(), getGasLimit());
 
         BigInteger tokensPerWei = BigInteger.valueOf(Long.parseLong(tokensPerWeiProp));
         BigInteger weiToPurchase = BigInteger.valueOf(1_000);  // In Wei equivalent. In testnet, watch out if Alice has sufficient Ether to purchase and pay gas

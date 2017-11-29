@@ -40,17 +40,16 @@ public class SmartContractDeployer extends UpgradedtelegramApplicationTests {
         // Test for blockchain connectivity
         assert(getAdmin().netListening().sendAsync().get().isListening());
         log.info("########## Blockchain is synced");
-    
-        Credentials owner = Credentials.create(getOwnerPrivateKey());
-    
+
         // Deploy contract
-        Token ownerContract = deploy(getAdmin(), owner, GAS_PRICE, GAS_LIMIT).send();
-        
+        Credentials owner = Credentials.create(getOwnerPrivateKey());
+        Token ownerContract = deploy(getAdmin(), owner, getGasPrice(), getGasLimit()).send();
+
         // Print contract address
         String contractAddress = ownerContract.getContractAddress();
         log.info(">>>>>>>>>> Contract address = " + contractAddress);
     
-        ownerContract = load(contractAddress, getAdmin(), owner, GAS_PRICE, GAS_LIMIT);
+        ownerContract = load(contractAddress, getAdmin(), owner, getGasPrice(), getGasLimit());
     
         // Test if contract is valid
         assertTrue(ownerContract.isValid());

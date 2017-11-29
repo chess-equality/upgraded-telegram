@@ -155,7 +155,7 @@ public class DepositAndWithdrawTest extends UpgradedtelegramApplicationTests {
 
         // Bob requires his own contract instance
         Credentials bob = Credentials.create(getBobPrivateKey());
-        Token bobContract = load(getOwnerContract().getContractAddress(), getAdmin(), bob, GAS_PRICE, GAS_LIMIT);
+        Token bobContract = load(getContractAddress(), getAdmin(), bob, getGasPrice(), getGasLimit());
 
         // Do deposit
         // try - catch is for testrpc
@@ -205,7 +205,7 @@ public class DepositAndWithdrawTest extends UpgradedtelegramApplicationTests {
 
         // Bob requires his own contract instance
         Credentials bob = Credentials.create(getBobPrivateKey());
-        Token bobContract = load(getOwnerContract().getContractAddress(), getAdmin(), bob, GAS_PRICE, GAS_LIMIT);
+        Token bobContract = load(getContractAddress(), getAdmin(), bob, getGasPrice(), getGasLimit());
 
         // Do withdraw
         // try - catch is for testrpc
