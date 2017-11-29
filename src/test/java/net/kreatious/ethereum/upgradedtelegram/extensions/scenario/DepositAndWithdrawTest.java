@@ -153,9 +153,8 @@ public class DepositAndWithdrawTest extends UpgradedtelegramApplicationTests {
 
         // Test deposit as Bob
 
-        Credentials bob = Credentials.create(getBobPrivateKey());
-
         // Bob requires his own contract instance
+        Credentials bob = Credentials.create(getBobPrivateKey());
         Token bobContract = load(getOwnerContract().getContractAddress(), getAdmin(), bob, GAS_PRICE, GAS_LIMIT);
 
         // Do deposit
@@ -163,7 +162,7 @@ public class DepositAndWithdrawTest extends UpgradedtelegramApplicationTests {
         try {
 
             TransactionReceipt transactionReceipt = bobContract.deposit(weiToDeposit).send();
-            log.info(">>>>>>>>>> transfer status = " + transactionReceipt.getStatus());
+            log.info(">>>>>>>>>> deposit status = " + transactionReceipt.getStatus());
 
             // Test that deposit has failed
             assertEquals(transactionReceipt.getStatus(), "0");
@@ -203,9 +202,8 @@ public class DepositAndWithdrawTest extends UpgradedtelegramApplicationTests {
 
         // Test withdraw as Bob
 
-        Credentials bob = Credentials.create(getBobPrivateKey());
-
         // Bob requires his own contract instance
+        Credentials bob = Credentials.create(getBobPrivateKey());
         Token bobContract = load(getOwnerContract().getContractAddress(), getAdmin(), bob, GAS_PRICE, GAS_LIMIT);
 
         // Do withdraw
@@ -213,7 +211,7 @@ public class DepositAndWithdrawTest extends UpgradedtelegramApplicationTests {
         try {
 
             TransactionReceipt transactionReceipt = bobContract.withdraw(weiToWithdraw).send();
-            log.info(">>>>>>>>>> transfer status = " + transactionReceipt.getStatus());
+            log.info(">>>>>>>>>> withdraw status = " + transactionReceipt.getStatus());
 
             // Test that withdraw has failed
             assertEquals(transactionReceipt.getStatus(), "0");

@@ -50,7 +50,7 @@ public class MintTest extends UpgradedtelegramApplicationTests {
 
         // Do minting
         TransactionReceipt transactionReceipt = getOwnerContract().mint(toMintInWei).send();
-        log.info(">>>>>>>>>> transfer status = " + transactionReceipt.getStatus());
+        log.info(">>>>>>>>>> mint status = " + transactionReceipt.getStatus());
 
         // Test that transfer has succeeded
         assertEquals(transactionReceipt.getStatus(), "1");
@@ -108,9 +108,8 @@ public class MintTest extends UpgradedtelegramApplicationTests {
 
         // Test minting as Alice
 
-        Credentials alice = Credentials.create(getAlicePrivateKey());
-
         // Alice requires her own contract instance
+        Credentials alice = Credentials.create(getAlicePrivateKey());
         Token aliceContract = load(getOwnerContract().getContractAddress(), getAdmin(), alice, GAS_PRICE, GAS_LIMIT);
 
         // Do minting

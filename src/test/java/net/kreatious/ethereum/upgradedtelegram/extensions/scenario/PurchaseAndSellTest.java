@@ -49,10 +49,9 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         
         BigInteger aliceTokens = getOwnerContract().balanceOf(getAliceAddress()).send();
         log.info(">>>>>>>>>> Alice's tokens before = " + aliceTokens.toString());
-        
-        Credentials alice = Credentials.create(getAlicePrivateKey());
-        
+
         // Alice requires her own contract instance
+        Credentials alice = Credentials.create(getAlicePrivateKey());
         Token aliceContract = load(getOwnerContract().getContractAddress(), getAdmin(), alice, GAS_PRICE, GAS_LIMIT);
         
         BigInteger tokensPerWei = BigInteger.valueOf(Long.parseLong(tokensPerWeiProp));
@@ -121,9 +120,8 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         BigInteger aliceTokens = getOwnerContract().balanceOf(getAliceAddress()).send();
         log.info(">>>>>>>>>> Alice's tokens before = " + aliceTokens.toString());
 
-        Credentials alice = Credentials.create(getAlicePrivateKey());
-
         // Alice requires her own contract instance
+        Credentials alice = Credentials.create(getAlicePrivateKey());
         Token aliceContract = load(getOwnerContract().getContractAddress(), getAdmin(), alice, GAS_PRICE, GAS_LIMIT);
 
         BigInteger tokensPerWei = BigInteger.valueOf(Long.parseLong(tokensPerWeiProp));

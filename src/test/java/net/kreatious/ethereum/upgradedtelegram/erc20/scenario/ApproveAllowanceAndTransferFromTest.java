@@ -102,9 +102,8 @@ public class ApproveAllowanceAndTransferFromTest extends UpgradedtelegramApplica
 
         // Test performing transfer as Alice on behalf of contract owner
 
-        Credentials alice = Credentials.create(getAlicePrivateKey());
-
         // Alice requires her own contract instance
+        Credentials alice = Credentials.create(getAlicePrivateKey());
         Token aliceContract = load(getOwnerContract().getContractAddress(), getAdmin(), alice, GAS_PRICE, GAS_LIMIT);
 
         // Do transferFrom
