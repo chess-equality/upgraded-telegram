@@ -51,10 +51,6 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         BigInteger aliceTokens = getOwnerContract().balanceOf(getAliceAddress()).send();
         log.info(">>>>>>>>>> Alice's tokens before = " + aliceTokens.toString());
 
-        // Alice requires her own contract instance
-        Credentials alice = Credentials.create(getAlicePrivateKey());
-        Token aliceContract = load(getContractAddress(), getAdmin(), alice, getGasPrice(), getGasLimit());
-        
         BigInteger tokensPerWei = BigInteger.valueOf(Long.parseLong(tokensPerWeiProp));
         BigInteger weiToPurchase = BigInteger.valueOf(1_000_000);  // In Wei equivalent. In testnet, watch out if Alice has sufficient Ether to purchase and pay gas
         
@@ -68,6 +64,10 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         log.info(">>>>>>>>>> Tokens to purchase in Wei = " + weiToPurchase.toString());
 
         assertThat("Alice has insufficient Ether to purchase the tokens", ethGetBalance.getBalance(), greaterThanOrEqualTo(weiToPurchase));
+
+        // Alice requires her own contract instance
+        Credentials alice = Credentials.create(getAlicePrivateKey());
+        Token aliceContract = load(getContractAddress(), getAdmin(), alice, getGasPrice(), getGasLimit());
 
         // Do purchase
         TransactionReceipt transactionReceipt = aliceContract.purchase(weiToPurchase).send();
@@ -122,10 +122,6 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         BigInteger aliceTokens = getOwnerContract().balanceOf(getAliceAddress()).send();
         log.info(">>>>>>>>>> Alice's tokens before = " + aliceTokens.toString());
 
-        // Alice requires her own contract instance
-        Credentials alice = Credentials.create(getAlicePrivateKey());
-        Token aliceContract = load(getContractAddress(), getAdmin(), alice, getGasPrice(), getGasLimit());
-
         BigInteger tokensPerWei = BigInteger.valueOf(Long.parseLong(tokensPerWeiProp));
         BigInteger weiToSell = BigInteger.valueOf(1_000_000);  // In Wei equivalent
 
@@ -134,6 +130,10 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
 
         // Test first if Alice has capacity to sell the number of tokens
         assertThat("Tokens to sell are greater than Alice's balance", aliceTokens, greaterThanOrEqualTo(totalTokensToSell));
+
+        // Alice requires her own contract instance
+        Credentials alice = Credentials.create(getAlicePrivateKey());
+        Token aliceContract = load(getContractAddress(), getAdmin(), alice, getGasPrice(), getGasLimit());
 
         // Do sell
         TransactionReceipt transactionReceipt = aliceContract.sell(totalTokensToSell).send();
@@ -182,17 +182,16 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
 
         log.info("******************** START: test3SellButNotPurchasedFirst()");
 
-        // John requires his own contract instance
-        Credentials john = Credentials.create(getJohnPrivateKey());
-        Token johnContract = load(getContractAddress(), getAdmin(), john, getGasPrice(), getGasLimit());
-
         BigInteger tokensPerWei = BigInteger.valueOf(Long.parseLong(tokensPerWeiProp));
         BigInteger weiToSell = BigInteger.valueOf(1_000_000);  // In Wei equivalent
 
         BigInteger totalTokensToSell = weiToSell.multiply(tokensPerWei);
         log.info(">>>>>>>>>> totalTokensToSell = " + totalTokensToSell.toString());
 
-        // Do sell
+        // John requires his own contract instance
+        Credentials john = Credentials.create(getJohnPrivateKey());
+        Token johnContract = load(getContractAddress(), getAdmin(), john, getGasPrice(), getGasLimit());
+
         // try - catch is for testrpc
         try {
 
@@ -201,6 +200,7 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
             BigInteger johnBalance = ethGetBalance.getBalance();
             log.info(">>>>>>>>>> John's Ether balance in Wei before sell = " + johnBalance.toString());
 
+            // Do sell
             TransactionReceipt transactionReceipt = johnContract.sell(totalTokensToSell).send();
             log.info(">>>>>>>>>> sell tx hash = " + transactionReceipt.getTransactionHash());
             log.info(">>>>>>>>>> sell status = " + transactionReceipt.getStatus());
@@ -252,10 +252,6 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         // Purchase tokens first
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        // Alice requires her own contract instance
-        Credentials alice = Credentials.create(getAlicePrivateKey());
-        Token aliceContract = load(getContractAddress(), getAdmin(), alice, getGasPrice(), getGasLimit());
-
         BigInteger tokensPerWei = BigInteger.valueOf(Long.parseLong(tokensPerWeiProp));
         BigInteger weiToPurchase = BigInteger.valueOf(1_000);  // In Wei equivalent. In testnet, watch out if Alice has sufficient Ether to purchase and pay gas
 
@@ -269,6 +265,10 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         log.info(">>>>>>>>>> Tokens to purchase in Wei = " + weiToPurchase.toString());
 
         assertThat("Alice has insufficient Ether to purchase the tokens", ethGetBalance.getBalance(), greaterThanOrEqualTo(weiToPurchase));
+
+        // Alice requires her own contract instance
+        Credentials alice = Credentials.create(getAlicePrivateKey());
+        Token aliceContract = load(getContractAddress(), getAdmin(), alice, getGasPrice(), getGasLimit());
 
         // Do purchase
         TransactionReceipt purchaseReceipt = aliceContract.purchase(weiToPurchase).send();
@@ -346,5 +346,85 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         assertThat(aliceTokensAfter, equalTo(aliceTokens));
 
         log.info("******************** END: test4SellNotDivisible()");
+    }
+
+    /**
+     * Tests purchase with 0 Ether
+     *
+     * @throws Exception
+     */
+    @Test
+    public void test5PurchaseWithZeroEther() throws Exception {
+
+        log.info("******************** START: test5PurchaseWithZeroEther()");
+
+        BigInteger ownerSupply = getOwnerContract().balanceOf(getOwnerAddress()).send();
+        log.info(">>>>>>>>>> Owner's supply before = " + ownerSupply.toString());
+
+        BigInteger johnTokens = getOwnerContract().balanceOf(getJohnAddress()).send();
+        log.info(">>>>>>>>>> John's tokens before = " + johnTokens.toString());
+
+        // John requires his own contract instance
+        Credentials john = Credentials.create(getJohnPrivateKey());
+        Token johnContract = load(getContractAddress(), getAdmin(), john, getGasPrice(), getGasLimit());
+
+        // try - catch is for testrpc
+        try {
+
+            // Get John's Ether balance
+            EthGetBalance ethGetBalance = getAdmin().ethGetBalance(getJohnAddress(), DefaultBlockParameterName.LATEST).sendAsync().get();
+            BigInteger johnBalance = ethGetBalance.getBalance();
+            log.info(">>>>>>>>>> John's Ether balance in Wei before purchase = " + johnBalance.toString());
+
+            // Do purchase
+            TransactionReceipt transactionReceipt = johnContract.purchase(BigInteger.ZERO).send();
+            log.info(">>>>>>>>>> purchase tx hash = " + transactionReceipt.getTransactionHash());
+            log.info(">>>>>>>>>> purchase status = " + transactionReceipt.getStatus());
+
+            // Test that purchase has not succeeded
+            assertEquals(transactionReceipt.getStatus(), "0");
+
+            // Test that no transfer event has been fired
+            assertThat("Transfer event has been fired", 0, equalTo(johnContract.getTransferEvents(transactionReceipt).size()));
+
+            // Get transaction fee
+            BigInteger gasUsed = transactionReceipt.getGasUsed();
+            BigInteger gasPrice = getAdmin().ethGetTransactionByHash(transactionReceipt.getTransactionHash()).sendAsync().get().getTransaction().get().getGasPrice();
+            BigInteger totalTxFee = gasUsed.multiply(gasPrice);
+
+            log.info(">>>>>>>>>> purchase gas used = " + gasUsed.toString());
+            log.info(">>>>>>>>>> purchase gas price = " + gasPrice.toString());
+            log.info(">>>>>>>>>> purchase total tx fee = " + totalTxFee.toString());
+
+            // Test that John's Ether balance has (only) been subtracted by the gas fee
+
+            johnBalance = johnBalance.subtract(totalTxFee);
+            log.info(">>>>>>>>>> johnBalance minus totalTxFee = " + johnBalance.toString());
+
+            EthGetBalance ethGetBalanceAfter = getAdmin().ethGetBalance(getJohnAddress(), DefaultBlockParameterName.LATEST).sendAsync().get();
+            BigInteger johnBalanceAfter = ethGetBalanceAfter.getBalance();
+            log.info(">>>>>>>>>> John's Ether balance in Wei after purchase = " + johnBalanceAfter.toString());
+
+            assertThat(johnBalanceAfter, equalTo(johnBalance));
+
+        } catch (Exception e) {
+            log.error("******************** EXCEPTION = " + e.getMessage());
+        }
+
+        // Test that the owner's supply has not been subtracted by the tokens purchased by John
+
+        BigInteger ownerSupplyAfter = johnContract.balanceOf(getOwnerAddress()).send();
+        log.info(">>>>>>>>>> Owner's supply after = " + ownerSupplyAfter.toString());
+
+        assertThat(ownerSupplyAfter, equalTo(ownerSupply));
+
+        // Test that John's tokens have not been increased by the purchased tokens
+
+        BigInteger johnTokensAfter = johnContract.balanceOf(getJohnAddress()).send();
+        log.info(">>>>>>>>>> John's tokens after = " + johnTokensAfter.toString());
+
+        assertThat(johnTokensAfter, equalTo(johnTokens));
+
+        log.info("******************** END: test5PurchaseWithZeroEther()");
     }
 }
