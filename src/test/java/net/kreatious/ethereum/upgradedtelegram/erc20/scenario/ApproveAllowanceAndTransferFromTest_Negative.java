@@ -30,24 +30,24 @@ public class ApproveAllowanceAndTransferFromTest_Negative extends Upgradedtelegr
 
     // Parameters:
     // 1. Allowance limit (in Wei equivalent)
-    // 2. Tokens to transfer (in Wei equivalent)
+    // 2. Tokens to transfer array (in Wei equivalent)
     @Parameterized.Parameters
     public static Collection<Object[]> tokensToTransferList() {
         return Arrays.asList(new Object[][] {
-            { BigInteger.valueOf(30_000), BigInteger.valueOf(30_001) },  // All in Wei equivalent
-            { BigInteger.valueOf(25_000), BigInteger.valueOf(25_001) }
+            { BigInteger.valueOf(30_000), new BigInteger[]{BigInteger.valueOf(20_000), BigInteger.valueOf(10_001), BigInteger.ZERO} },
+            { BigInteger.valueOf(20_000), new BigInteger[]{BigInteger.valueOf(19_999), BigInteger.valueOf(2), BigInteger.ZERO, } }
         });
     }
 
     private TestContextManager testContextManager;
 
     private final BigInteger allowance;
-    private final BigInteger tokensToTransfer;
+    private final BigInteger[] tokensToTransferArray;
 
-    public ApproveAllowanceAndTransferFromTest_Negative(BigInteger allowance, BigInteger tokensToTransfer) {
+    public ApproveAllowanceAndTransferFromTest_Negative(BigInteger allowance, BigInteger... tokensToTransferArray) {
 
         this.allowance = allowance;
-        this.tokensToTransfer = tokensToTransfer;
+        this.tokensToTransferArray = tokensToTransferArray;
     }
     
     @Before
@@ -108,43 +108,93 @@ public class ApproveAllowanceAndTransferFromTest_Negative extends Upgradedtelegr
         Credentials alice = Credentials.create(getAlicePrivateKey());
         Token aliceContract = load(getContractAddress(), getAdmin(), alice, getGasPrice(), getGasLimit());
 
-        // Do transferFrom
-        // try - catch is for testrpc
-        try {
+        for (int i = 0; i < tokensToTransferArray.length; i++) {
 
-            log.info(">>>>>>>>>> tokensToTransfer = " + tokensToTransfer);
+            BigInteger tokensToTransfer = tokensToTransferArray[i];
 
-            TransactionReceipt aliceTransferReceipt = aliceContract.transferFrom(
-                    getOwnerAddress(),
-                    getAliceAddress(),
-                    tokensToTransfer).send();
+            log.info(">>>>>>>>>> tokensToTransfer = " + tokensToTransfer.toString());
 
-            log.info(">>>>>>>>>> transferFrom tx hash = " + aliceTransferReceipt.getTransactionHash());
-            log.info(">>>>>>>>>> transferFrom status = " + aliceTransferReceipt.getStatus());
+            // First value is ok...
+            if (i == 0) {
 
-            // Test that transferFrom has not succeeded
-            assertEquals(aliceTransferReceipt.getStatus(), "0");
+                // Do transferFrom
+                TransactionReceipt aliceTransferReceipt = aliceContract.transferFrom(
+                        getOwnerAddress(),
+                        getAliceAddress(),
+                        tokensToTransfer).send();
 
-            // Test that no transfer event has been fired
-            assertThat("Transfer event has been fired", 0, equalTo(aliceContract.getTransferEvents(aliceTransferReceipt).size()));
+                log.info(">>>>>>>>>> transferFrom tx hash = " + aliceTransferReceipt.getTransactionHash());
+                log.info(">>>>>>>>>> transferFrom status = " + aliceTransferReceipt.getStatus());
 
-        } catch (Exception e) {
-            log.error("******************** EXCEPTION = " + e.getMessage());
+                // Test that transfer has succeeded
+                assertEquals(aliceTransferReceipt.getStatus(), "1");
+
+                Token.TransferEventResponse aliceTransferEventValues = aliceContract.getTransferEvents(aliceTransferReceipt).get(0);
+                log.info(">>>>>>>>>> value from transfer event = " + aliceTransferEventValues._value);
+
+                // Test transfer event particulars
+                assertThat(aliceTransferEventValues._from, equalTo(getOwnerAddress()));
+                assertThat(aliceTransferEventValues._to, equalTo(getAliceAddress()));
+                assertThat(aliceTransferEventValues._value, equalTo(tokensToTransfer));
+
+                // Test that the owner's supply has been subtracted by the tokens transferred to Alice
+
+                ownerSupply = ownerSupply.subtract(tokensToTransfer);
+
+                BigInteger ownerSupplyAfter = aliceContract.balanceOf(getOwnerAddress()).send();
+                log.info(">>>>>>>>>> Owner's supply after = " + ownerSupplyAfter.toString());
+
+                assertThat(ownerSupplyAfter, equalTo(ownerSupply));
+
+                // Test that Alice's tokens have been increased by the transferred tokens
+
+                aliceTokens = aliceTokens.add(tokensToTransfer);
+
+                BigInteger aliceTokensAfter = aliceContract.balanceOf(getAliceAddress()).send();
+                log.info(">>>>>>>>>> Alice's tokens after = " + aliceTokensAfter.toString());
+
+                assertThat(aliceTokensAfter, equalTo(aliceTokens));
+
+            // ...while succeeding values are not
+            } else if (i >= 1) {
+
+                // Do transferFrom
+                // try - catch is for testrpc
+                try {
+
+                    TransactionReceipt aliceTransferReceipt = aliceContract.transferFrom(
+                            getOwnerAddress(),
+                            getAliceAddress(),
+                            tokensToTransfer).send();
+
+                    log.info(">>>>>>>>>> transferFrom tx hash = " + aliceTransferReceipt.getTransactionHash());
+                    log.info(">>>>>>>>>> transferFrom status = " + aliceTransferReceipt.getStatus());
+
+                    // Test that transferFrom has not succeeded
+                    assertEquals(aliceTransferReceipt.getStatus(), "0");
+
+                    // Test that no transfer event has been fired
+                    assertThat("Transfer event has been fired", 0, equalTo(aliceContract.getTransferEvents(aliceTransferReceipt).size()));
+
+                } catch (Exception e) {
+                    log.error("******************** EXCEPTION = " + e.getMessage());
+                }
+
+                // Test that the owner's supply has not been subtracted by the tokens transferred to Alice
+
+                BigInteger ownerSupplyAfter = aliceContract.balanceOf(getOwnerAddress()).send();
+                log.info(">>>>>>>>>> Owner's supply after = " + ownerSupplyAfter.toString());
+
+                assertThat(ownerSupplyAfter, equalTo(ownerSupply));
+
+                // Test that Alice's tokens have not been increased by the transferred tokens
+
+                BigInteger aliceTokensAfter = aliceContract.balanceOf(getAliceAddress()).send();
+                log.info(">>>>>>>>>> Alice's tokens after = " + aliceTokensAfter.toString());
+
+                assertThat(aliceTokensAfter, equalTo(aliceTokens));
+            }
         }
-
-        // Test that the owner's supply has not been subtracted by the tokens transferred to Alice
-
-        BigInteger ownerSupplyAfter = aliceContract.balanceOf(getOwnerAddress()).send();
-        log.info(">>>>>>>>>> Owner's supply after = " + ownerSupplyAfter.toString());
-
-        assertThat(ownerSupplyAfter, equalTo(ownerSupply));
-
-        // Test that Alice's tokens have not been increased by the transferred tokens
-
-        BigInteger aliceTokensAfter = aliceContract.balanceOf(getAliceAddress()).send();
-        log.info(">>>>>>>>>> Alice's tokens after = " + aliceTokensAfter.toString());
-
-        assertThat(aliceTokensAfter, equalTo(aliceTokens));
 
         log.info("******************** END: Test transfer from Negative");
     }
