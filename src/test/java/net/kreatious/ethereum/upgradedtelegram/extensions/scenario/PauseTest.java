@@ -53,10 +53,10 @@ public class PauseTest extends UpgradedtelegramApplicationTests {
         // Test that set paused succeeded
         assertEquals(setPausedReceipt.getStatus(), "1");
 
-        // Do transfer
         // try - catch is for testrpc
         try {
 
+            // Do transfer
             TransactionReceipt transactionReceipt = getOwnerContract().transfer(getBobAddress(), transferToBobInWei).send();
             log.info(">>>>>>>>>> transfer tx hash = " + transactionReceipt.getTransactionHash());
             log.info(">>>>>>>>>> transfer status = " + transactionReceipt.getStatus());

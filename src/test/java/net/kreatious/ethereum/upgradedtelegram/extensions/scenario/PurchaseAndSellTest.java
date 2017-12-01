@@ -291,8 +291,6 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
         // Assert that totalTokensToSell is not divisible by tokensPerWei
         assertNotEquals(BigInteger.ZERO, modulo);
 
-        // Do sell
-
         BigInteger aliceTokens = aliceContract.balanceOf(getAliceAddress()).send();
         log.info(">>>>>>>>>> Alice's tokens before = " + aliceTokens.toString());
 
@@ -304,6 +302,7 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
             BigInteger aliceBalance = ethGetBalance.getBalance();
             log.info(">>>>>>>>>> Alice's Ether balance in Wei before sell = " + aliceBalance.toString());
 
+            // Do sell
             TransactionReceipt sellReceipt = aliceContract.sell(totalTokensToSell).send();
             log.info(">>>>>>>>>> sell tx hash = " + sellReceipt.getTransactionHash());
             log.info(">>>>>>>>>> sell status = " + sellReceipt.getStatus());

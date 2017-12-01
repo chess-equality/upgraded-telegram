@@ -113,10 +113,10 @@ public class MintTest extends UpgradedtelegramApplicationTests {
         Credentials alice = Credentials.create(getAlicePrivateKey());
         Token aliceContract = load(getContractAddress(), getAdmin(), alice, getGasPrice(), getGasLimit());
 
-        // Do minting
         // try - catch is for testrpc
         try {
 
+            // Do minting
             TransactionReceipt transactionReceipt = aliceContract.mint(toMintInWei).send();
             log.info(">>>>>>>>>> mint tx hash = " + transactionReceipt.getTransactionHash());
             log.info(">>>>>>>>>> mint status = " + transactionReceipt.getStatus());

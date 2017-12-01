@@ -60,6 +60,7 @@ public class SmartContractKiller extends UpgradedtelegramApplicationTests {
             log.info(">>>>>>>>>> transferToBob in Ether equivalent = " + transferToBob.toString());
             log.info(">>>>>>>>>> transferToBob in Wei equivalent = " + transferToBobInWei.toString());
 
+            // Do transfer
             TransactionReceipt transactionReceipt = getOwnerContract().transfer(getBobAddress(), transferToBobInWei).send();
             log.info(">>>>>>>>>> transfer tx hash = " + transactionReceipt.getTransactionHash());
             log.info(">>>>>>>>>> transfer status = " + transactionReceipt.getStatus());

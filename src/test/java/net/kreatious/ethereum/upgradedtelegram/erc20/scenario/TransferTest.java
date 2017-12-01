@@ -246,10 +246,10 @@ public class TransferTest extends UpgradedtelegramApplicationTests {
         Credentials john = Credentials.create(getJohnPrivateKey());
         Token johnContract = load(getContractAddress(), getAdmin(), john, getGasPrice(), getGasLimit());
 
-        // Do transfer by John to himself
         // try - catch is for testrpc
         try {
 
+            // Do transfer by John to himself
             TransactionReceipt transactionReceipt = johnContract.transfer(getJohnAddress(), transferToJohnInWei).send();
             log.info(">>>>>>>>>> transfer tx hash = " + transactionReceipt.getTransactionHash());
             log.info(">>>>>>>>>> transfer status = " + transactionReceipt.getStatus());

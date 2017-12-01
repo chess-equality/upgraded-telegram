@@ -158,10 +158,10 @@ public class ApproveAllowanceAndTransferFromTest_Negative extends Upgradedtelegr
             // ...while succeeding values are not
             } else if (i >= 1) {
 
-                // Do transferFrom
                 // try - catch is for testrpc
                 try {
 
+                    // Do transferFrom
                     TransactionReceipt aliceTransferReceipt = aliceContract.transferFrom(
                             getOwnerAddress(),
                             getAliceAddress(),

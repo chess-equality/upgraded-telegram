@@ -157,10 +157,10 @@ public class DepositAndWithdrawTest extends UpgradedtelegramApplicationTests {
         Credentials bob = Credentials.create(getBobPrivateKey());
         Token bobContract = load(getContractAddress(), getAdmin(), bob, getGasPrice(), getGasLimit());
 
-        // Do deposit
         // try - catch is for testrpc
         try {
 
+            // Do deposit
             TransactionReceipt transactionReceipt = bobContract.deposit(weiToDeposit).send();
             log.info(">>>>>>>>>> deposit tx hash = " + transactionReceipt.getTransactionHash());
             log.info(">>>>>>>>>> deposit status = " + transactionReceipt.getStatus());
@@ -207,10 +207,10 @@ public class DepositAndWithdrawTest extends UpgradedtelegramApplicationTests {
         Credentials bob = Credentials.create(getBobPrivateKey());
         Token bobContract = load(getContractAddress(), getAdmin(), bob, getGasPrice(), getGasLimit());
 
-        // Do withdraw
         // try - catch is for testrpc
         try {
 
+            // Do withdraw
             TransactionReceipt transactionReceipt = bobContract.withdraw(weiToWithdraw).send();
             log.info(">>>>>>>>>> withdraw tx hash = " + transactionReceipt.getTransactionHash());
             log.info(">>>>>>>>>> withdraw status = " + transactionReceipt.getStatus());
