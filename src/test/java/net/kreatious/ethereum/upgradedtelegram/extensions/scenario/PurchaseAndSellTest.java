@@ -71,7 +71,7 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
 
         // Do purchase
         TransactionReceipt transactionReceipt = aliceContract.purchase(weiToPurchase).send();
-        log.info(">>>>>>>>>> purcahse tx hash = " + transactionReceipt.getTransactionHash());
+        log.info(">>>>>>>>>> purchase tx hash = " + transactionReceipt.getTransactionHash());
         log.info(">>>>>>>>>> purchase status = " + transactionReceipt.getStatus());
 
         // Test that transfer has succeeded
@@ -173,7 +173,7 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
     }
 
     /**
-     * Tests selling by John who has not purchased any tokens
+     * Tests selling by John who has 0 tokens
      *
      * @throws Exception
      */
@@ -239,14 +239,204 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
     }
 
     /**
+     * Tests purchase then overselling by John. John's token balance must be 0.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void test4PurchaseThenOversell() throws Exception {
+
+        log.info("******************** START: test4PurchaseThenOversell()");
+
+        BigInteger johnTokens = getOwnerContract().balanceOf(getJohnAddress()).send();
+        log.info(">>>>>>>>>> John's tokens before = " + johnTokens.toString());
+
+        // Test that John's token balance is 0
+        assertThat(johnTokens, equalTo(BigInteger.ZERO));
+
+        BigInteger tokensPerWei = BigInteger.valueOf(Long.parseLong(tokensPerWeiProp));
+
+        // In Wei equivalents. In testnet, watch out if John has sufficient Ether to purchase/sell and pay gas
+        BigInteger weiToPurchase = BigInteger.valueOf(1_000_000);
+        BigInteger weiToOversell = BigInteger.valueOf(1_000_001);
+        BigInteger weiToSell = BigInteger.valueOf(weiToPurchase.longValueExact());
+
+        BigInteger totalTokensToPurchase = weiToPurchase.multiply(tokensPerWei);
+        log.info(">>>>>>>>>> totalTokensToPurchase = " + totalTokensToPurchase.toString());
+
+        BigInteger totalTokensToOversell = weiToOversell.multiply(tokensPerWei);
+        log.info(">>>>>>>>>> totalTokensToOversell = " + totalTokensToOversell.toString());
+
+        BigInteger totalTokensToSell = weiToSell.multiply(tokensPerWei);
+        log.info(">>>>>>>>>> totalTokensToSell = " + totalTokensToSell.toString());
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Purchase tokens first
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        BigInteger ownerSupply = getOwnerContract().balanceOf(getOwnerAddress()).send();
+        log.info(">>>>>>>>>> Owner's supply before = " + ownerSupply.toString());
+
+        // Test first if John has sufficient Ether to purchase the number of tokens
+
+        EthGetBalance ethGetBalance = getAdmin().ethGetBalance(getJohnAddress(), DefaultBlockParameterName.LATEST).sendAsync().get();
+        log.info(">>>>>>>>>> John's Ether balance in Wei = " + ethGetBalance.getBalance().toString());
+        log.info(">>>>>>>>>> Tokens to purchase in Wei = " + weiToPurchase.toString());
+
+        assertThat("John has insufficient Ether to purchase the tokens", ethGetBalance.getBalance(), greaterThanOrEqualTo(weiToPurchase));
+
+        // John requires his own contract instance
+        Credentials john = Credentials.create(getJohnPrivateKey());
+        Token johnContract = load(getContractAddress(), getAdmin(), john, getGasPrice(), getGasLimit());
+
+        // Do purchase
+        TransactionReceipt purchaseReceipt = johnContract.purchase(weiToPurchase).send();
+        log.info(">>>>>>>>>> purchase tx hash = " + purchaseReceipt.getTransactionHash());
+        log.info(">>>>>>>>>> purchase status = " + purchaseReceipt.getStatus());
+
+        // Test that transfer has succeeded
+        assertEquals(purchaseReceipt.getStatus(), "1");
+
+        Token.TransferEventResponse purchaseTransferEventValues = johnContract.getTransferEvents(purchaseReceipt).get(0);
+        log.info(">>>>>>>>>> value from transfer event = " + purchaseTransferEventValues._value);
+
+        // Test transfer event particulars
+        assertThat(purchaseTransferEventValues._from, equalTo(getOwnerAddress()));
+        assertThat(purchaseTransferEventValues._to, equalTo(getJohnAddress()));
+        assertThat(purchaseTransferEventValues._value, equalTo(totalTokensToPurchase));
+
+        // Test that the owner's supply has been subtracted by the tokens purchased by John
+
+        ownerSupply = ownerSupply.subtract(totalTokensToPurchase);
+
+        BigInteger ownerSupplyAfter = johnContract.balanceOf(getOwnerAddress()).send();
+        log.info(">>>>>>>>>> Owner's supply after purchase = " + ownerSupplyAfter.toString());
+
+        assertThat(ownerSupplyAfter, equalTo(ownerSupply));
+
+        // Test that John's tokens have been increased by the purchased tokens
+
+        johnTokens = johnTokens.add(totalTokensToPurchase);
+
+        BigInteger johnTokensAfter = johnContract.balanceOf(getJohnAddress()).send();
+        log.info(">>>>>>>>>> John's tokens after purchase = " + johnTokensAfter.toString());
+
+        assertThat(johnTokensAfter, equalTo(johnTokens));
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Now sell more than what was purchased
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // try - catch is for testrpc
+        try {
+
+            // Get John's Ether balance
+            ethGetBalance = getAdmin().ethGetBalance(getJohnAddress(), DefaultBlockParameterName.LATEST).sendAsync().get();
+            BigInteger johnBalance = ethGetBalance.getBalance();
+            log.info(">>>>>>>>>> John's Ether balance in Wei before oversell = " + johnBalance.toString());
+
+            // Do sell
+            TransactionReceipt oversellReceipt = johnContract.sell(totalTokensToOversell).send();
+            log.info(">>>>>>>>>> oversell tx hash = " + oversellReceipt.getTransactionHash());
+            log.info(">>>>>>>>>> oversell status = " + oversellReceipt.getStatus());
+
+            // Test that sell has not succeeded
+            assertEquals(oversellReceipt.getStatus(), "0");
+
+            // Test that no transfer event has been fired
+            assertThat("Transfer event has been fired", 0, equalTo(johnContract.getTransferEvents(oversellReceipt).size()));
+
+            // Get transaction fee
+            BigInteger gasUsed = oversellReceipt.getGasUsed();
+            BigInteger gasPrice = getAdmin().ethGetTransactionByHash(oversellReceipt.getTransactionHash()).sendAsync().get().getTransaction().get().getGasPrice();
+            BigInteger totalTxFee = gasUsed.multiply(gasPrice);
+
+            log.info(">>>>>>>>>> oversell gas used = " + gasUsed.toString());
+            log.info(">>>>>>>>>> oversell gas price = " + gasPrice.toString());
+            log.info(">>>>>>>>>> oversell total tx fee = " + totalTxFee.toString());
+
+            // Test that John's Ether balance has (only) been subtracted by the gas fee
+
+            johnBalance = johnBalance.subtract(totalTxFee);
+            log.info(">>>>>>>>>> johnBalance minus totalTxFee = " + johnBalance.toString());
+
+            EthGetBalance ethGetBalanceAfter = getAdmin().ethGetBalance(getJohnAddress(), DefaultBlockParameterName.LATEST).sendAsync().get();
+            BigInteger johnBalanceAfter = ethGetBalanceAfter.getBalance();
+            log.info(">>>>>>>>>> John's Ether balance in Wei after oversell = " + johnBalanceAfter.toString());
+
+            assertThat(johnBalanceAfter, equalTo(johnBalance));
+
+        } catch (Exception e) {
+            log.error("******************** EXCEPTION = " + e.getMessage());
+        }
+
+        // Test that the owner's supply has not been subtracted by the tokens sold by John
+
+        ownerSupplyAfter = johnContract.balanceOf(getOwnerAddress()).send();
+        log.info(">>>>>>>>>> Owner's supply after oversell = " + ownerSupplyAfter.toString());
+
+        assertThat(ownerSupplyAfter, equalTo(ownerSupply));
+
+        // Test that John's tokens have not been subtracted by the sold tokens
+
+        johnTokensAfter = johnContract.balanceOf(getJohnAddress()).send();
+        log.info(">>>>>>>>>> John's tokens after oversell = " + johnTokensAfter.toString());
+
+        assertThat(johnTokensAfter, equalTo(johnTokens));
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Sell back the correct number of tokens purchased to return balance to 0
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        // Do sell
+        TransactionReceipt sellReceipt = johnContract.sell(totalTokensToSell).send();
+        log.info(">>>>>>>>>> sell tx hash = " + sellReceipt.getTransactionHash());
+        log.info(">>>>>>>>>> sell status = " + sellReceipt.getStatus());
+
+        // Test that sell has succeeded
+        assertEquals(sellReceipt.getStatus(), "1");
+
+        Token.TransferEventResponse sellTransferEventValues = johnContract.getTransferEvents(sellReceipt).get(0);
+        log.info(">>>>>>>>>> value from transfer event = " + sellTransferEventValues._value);
+
+        // Test transfer event particulars
+        assertThat(sellTransferEventValues._from, equalTo(getJohnAddress()));
+        assertThat(sellTransferEventValues._to, equalTo(getOwnerAddress()));
+        assertThat(sellTransferEventValues._value, equalTo(totalTokensToSell));
+
+        // Test that the owner's supply has been increased by the tokens sold by John
+
+        ownerSupply = ownerSupply.add(totalTokensToSell);
+
+        ownerSupplyAfter = johnContract.balanceOf(getOwnerAddress()).send();
+        log.info(">>>>>>>>>> Owner's supply after sell = " + ownerSupplyAfter.toString());
+
+        assertThat(ownerSupplyAfter, equalTo(ownerSupply));
+
+        // Test that John's tokens have been decreased by the sold tokens
+
+        johnTokens = johnTokens.subtract(totalTokensToSell);
+
+        johnTokensAfter = johnContract.balanceOf(getJohnAddress()).send();
+        log.info(">>>>>>>>>> John's tokens after sell = " + johnTokensAfter.toString());
+
+        assertThat(johnTokensAfter, equalTo(johnTokens));
+
+        // Test that John's token balance is again 0
+        assertThat(johnTokensAfter, equalTo(BigInteger.ZERO));
+
+        log.info("******************** END: test4PurchaseThenOversell()");
+    }
+
+    /**
      * Tests selling of amount not divisible by tokensPerWei
      *
      * @throws Exception
      */
     @Test
-    public void test4SellNotDivisible() throws Exception {
+    public void test5SellNotDivisible() throws Exception {
 
-        log.info("******************** START: test4SellNotDivisible()");
+        log.info("******************** START: test5SellNotDivisible()");
 
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         // Purchase tokens first
@@ -344,7 +534,7 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
 
         assertThat(aliceTokensAfter, equalTo(aliceTokens));
 
-        log.info("******************** END: test4SellNotDivisible()");
+        log.info("******************** END: test5SellNotDivisible()");
     }
 
     /**
@@ -353,9 +543,9 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
      * @throws Exception
      */
     @Test
-    public void test5PurchaseWithZeroEther() throws Exception {
+    public void test6PurchaseWithZeroEther() throws Exception {
 
-        log.info("******************** START: test5PurchaseWithZeroEther()");
+        log.info("******************** START: test6PurchaseWithZeroEther()");
 
         BigInteger ownerSupply = getOwnerContract().balanceOf(getOwnerAddress()).send();
         log.info(">>>>>>>>>> Owner's supply before = " + ownerSupply.toString());
@@ -424,6 +614,6 @@ public class PurchaseAndSellTest extends UpgradedtelegramApplicationTests {
 
         assertThat(johnTokensAfter, equalTo(johnTokens));
 
-        log.info("******************** END: test5PurchaseWithZeroEther()");
+        log.info("******************** END: test6PurchaseWithZeroEther()");
     }
 }
