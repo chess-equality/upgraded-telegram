@@ -10,6 +10,7 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
     PurchaseAndSellTest.class,
+    FallbackPurchaseTest.class,
     PauseTest.class,
     DepositAndWithdrawTest.class,
     ReserveTest.class,

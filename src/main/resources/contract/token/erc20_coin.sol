@@ -105,7 +105,12 @@ contract Token {
         
         Transfer(owner, msg.sender, tokens);
     }
-    
+
+    // Fallback function for purchasing tokens
+    function () public payable unpaused {
+        purchase();
+    }
+
     // Sells tokens in exchange for wei
     function sell(uint256 _amount) public unpaused returns (bool success) {
         require(balances[msg.sender] >= _amount);

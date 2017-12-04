@@ -11,5 +11,5 @@
 
 ### Generate Java wrapper class file
 1. While in token folder, run: `$ web3j solidity generate build/Token.bin build/Token.abi -o generated -p net.kreatious.ethereum.upgradedtelegram.contract.generated`
-2. Copy generated class file to appropriate package in `src/main/java`.
+2. Copy generated class file to appropriate package in `src/main/java`. <b>NOTE</b>: If you are meaning to "kill" the old contract first before deploying the new, please run the `SmartContractKiller` test first before updating the generated class file. 
 3. Delete the generated class file here in `generated` folder.

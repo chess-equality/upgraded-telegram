@@ -22,8 +22,12 @@
 2. Sell the purchased tokens
 3. Sell without purchasing
 4. Purchase then oversell
-5. Sell tokens not divisible with rate
+5. Sell tokens not divisible by rate
 6. Purchase with 0 Ether
+
+#### `purchase` (fallback function):
+1. Purchase tokens
+2. Purchase with 0 Ether
 
 #### `mint`:
 1. Minting by contract owner
